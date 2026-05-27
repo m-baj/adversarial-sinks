@@ -53,6 +53,9 @@ create_environment:
 
 
 
+
+
+
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################
@@ -62,6 +65,16 @@ create_environment:
 .PHONY: data
 data: requirements
 	$(PYTHON_INTERPRETER) adversarial_sinks/dataset.py
+
+## Train model on CIFAR-10
+.PHONY: train
+train: requirements
+	$(PYTHON_INTERPRETER) adversarial_sinks/modeling/train.py
+
+## Generate prediction grid (usage: make predict CKPT=models/checkpoints/your.ckpt)
+.PHONY: predict
+predict: requirements
+	$(PYTHON_INTERPRETER) adversarial_sinks/modeling/predict.py $(CKPT)
 
 
 #################################################################################
