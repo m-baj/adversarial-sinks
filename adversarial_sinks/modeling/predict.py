@@ -2,24 +2,14 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import torch
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
 import typer
 from loguru import logger
-from torch.utils.data import DataLoader
 
 from adversarial_sinks.config import FIGURES_DIR, MODELS_DIR, RAW_DATA_DIR
+from adversarial_sinks.dataset import CIFAR10_CLASSES, CIFAR10_MEAN, CIFAR10_STD, CIFAR10DataModule
 from adversarial_sinks.modeling.train import CIFAR10Module
 
 app = typer.Typer()
-
-CIFAR10_CLASSES = [
-    "airplane", "automobile", "bird", "cat", "deer",
-    "dog", "frog", "horse", "ship", "truck",
-]
-
-CIFAR10_MEAN = (0.4914, 0.4822, 0.4465)
-CIFAR10_STD  = (0.2470, 0.2435, 0.2616)
 
 
 def denormalize(tensor: torch.Tensor) -> torch.Tensor:
@@ -42,14 +32,9 @@ def main(
     model = CIFAR10Module.load_from_checkpoint(checkpoint, map_location=device)
     model.eval()
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
-    ])
-    test_ds = datasets.CIFAR10(root=data_dir, train=False, transform=transform)
-    loader = DataLoader(test_ds, batch_size=rows * cols, shuffle=True)
-
-    images, labels = next(iter(loader))
+    dm = CIFAR10DataModule(data_dir=data_dir, batch_size=rows * cols, num_workers=4)
+    dm.setup()
+    images, labels = next(iter(dm.test_dataloader()))
     images, labels = images.to(device), labels.to(device)
 
     with torch.no_grad():
@@ -57,7 +42,7 @@ def main(
 
     images = images.cpu()
     labels = labels.cpu()
-    preds = preds.cpu()
+    preds  = preds.cpu()
 
     fig, axes = plt.subplots(rows, cols, figsize=(cols * 1.5, rows * 1.8))
     for i, ax in enumerate(axes.flat):
