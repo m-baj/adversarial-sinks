@@ -76,6 +76,11 @@ train: requirements
 predict: requirements
 	$(PYTHON_INTERPRETER) adversarial_sinks/modeling/predict.py $(CKPT)
 
+## Run full experiment pipeline (usage: make pipeline RUN=exp01)
+.PHONY: pipeline
+pipeline: requirements
+	$(PYTHON_INTERPRETER) adversarial_sinks/pipeline.py $(RUN)
+
 
 #################################################################################
 # Self Documenting Commands                                                     #

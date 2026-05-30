@@ -9,42 +9,55 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from adversarial_sinks.config import MODELS_DIR, RAW_DATA_DIR
 from adversarial_sinks.dataset import CIFAR10DataModule
+from adversarial_sinks.modeling.losses import CrossEntropyLoss, LossFn
 from adversarial_sinks.modeling.model import CIFAR10CNN
 
 app = typer.Typer()
 
 
 class CIFAR10Module(L.LightningModule):
-    def __init__(self, num_classes: int = 10, lr: float = 0.1, epochs: int = 100) -> None:
+    def __init__(
+        self,
+        num_classes: int = 10,
+        lr: float = 0.1,
+        epochs: int = 100,
+        loss_fn: LossFn | None = None,
+    ) -> None:
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=["loss_fn"])
         self.model = CIFAR10CNN(num_classes=num_classes)
+        self.loss_fn = loss_fn or CrossEntropyLoss()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-    def _step(self, batch: tuple) -> tuple[torch.Tensor, torch.Tensor]:
-        x, y = batch
-        logits = self(x)
-        loss = F.cross_entropy(logits, y)
-        acc = (logits.argmax(dim=1) == y).float().mean()
-        return loss, acc
 
     def training_step(self, batch: tuple, _: int) -> torch.Tensor:
-        loss, acc = self._step(batch)
-        self.log("train/loss", loss, on_epoch=True, on_step=False, prog_bar=True)
+        x, y = batch
+        out = self.loss_fn(self.model, x, y)
+        self.log("train/loss", out.total, on_epoch=True, on_step=False, prog_bar=True)
+        for name, value in out.components.items():
+            self.log(f"train/{name}", value, on_epoch=True, on_step=False)
+        with torch.no_grad():
+            acc = (self.model(x).argmax(dim=1) == y).float().mean()
         self.log("train/acc", acc, on_epoch=True, on_step=False, prog_bar=True)
-        return loss
+        return out.total
+
+    def _eval_step(self, batch: tuple, stage: str) -> None:
+        x, y = batch
+        logits = self.model(x)
+        loss = F.cross_entropy(logits, y)
+        acc = (logits.argmax(dim=1) == y).float().mean()
+        self.log(f"{stage}/loss", loss, prog_bar=True)
+        self.log(f"{stage}/acc", acc, prog_bar=True)
 
     def validation_step(self, batch: tuple, _: int) -> None:
-        loss, acc = self._step(batch)
-        self.log("val/loss", loss, prog_bar=True)
-        self.log("val/acc", acc, prog_bar=True)
+        self._eval_step(batch, "val")
 
     def test_step(self, batch: tuple, _: int) -> None:
-        loss, acc = self._step(batch)
-        self.log("test/loss", loss)
-        self.log("test/acc", acc)
+        self._eval_step(batch, "test")
+
+    # ------------------------------------------------------------------
 
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(
@@ -78,7 +91,10 @@ def main(
         val_split=val_split,
     )
 
-    model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs)
+    # Swap CrossEntropyLoss() for AdversarialSinkLoss(...) here to change the experiment
+    loss_fn = CrossEntropyLoss()
+
+    model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn)
 
     tb_logger = TensorBoardLogger(save_dir=model_dir / "logs", name="cifar10")
 
