@@ -1,22 +1,84 @@
+import json
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import torch
 
 from adversarial_sinks.attacks import AttackResult
 from adversarial_sinks.config import FIGURES_DIR
 
 
-def robust_accuracy(results: list[AttackResult]) -> dict[float, float]:
-    """
-    Compute robust accuracy for each epsilon.
-    Returns a dict mapping epsilon → robust accuracy in [0, 1].
-    """
-    scores = {}
-    for r in results:
-        acc = 1 - r.success.to(torch.float32).mean().item()
-        scores[r.epsilon] = acc
-    return scores
+def generate_report(
+    exp_id: str,
+    loss_description: str,
+    hyperparams: dict,
+    checkpoint: Path,
+    report: dict,
+) -> str:
+    """Render the experiment report as a Markdown string."""
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    rows = "\n".join(
+        f"| {e['epsilon']:<8} | {e['robust_accuracy']*100:6.2f}% "
+        f"| {e['sink_convergence']:+.4f} "
+        f"| {e['mean_linf']:.4f} |"
+        for e in report["per_epsilon"]
+    )
+    hp_rows = "\n".join(f"| {k} | {v} |" for k, v in hyperparams.items())
+
+    return f"""# Experiment Report: {exp_id}
+
+**Date:** {ts}
+**Loss function:** `{loss_description}`
+**Checkpoint:** `{checkpoint}`
+
+## Hyperparameters
+
+| Parameter | Value |
+|-----------|-------|
+{hp_rows}
+
+## Results
+
+**Clean accuracy:** {report['clean_accuracy']*100:.2f}%
+
+### PGD Attack Results
+
+| Epsilon  | Robust Acc | Sink Convergence | Mean Linf |
+|----------|------------|------------------|-----------|
+{rows}
+
+**Sink convergence** is cosine similarity between the adversarial perturbation
+and the sink pattern (range −1 to 1). Target: as close to **1.0** as possible.
+
+## Adversarial Examples
+
+![Adversarial examples](figures/adversarial_examples.png)
+
+---
+
+## LLM Agent Assessment
+
+> This section should be filled in by the LLM agent after examining the figure above.
+
+### Visual Description
+<!-- Describe what the adversarial perturbations look like. Do they resemble the sink pattern? -->
+
+
+### Analysis
+<!-- Interpret the metrics. Is sink_convergence improving? Is clean_accuracy acceptable? -->
+
+
+### Recommended Changes to Loss Function
+<!-- Suggest specific changes to losses.py for the next experiment. Be concrete:
+     which hyperparameter to change, which component to add/remove, and why. -->
+
+
+---
+*Raw metrics (JSON):*
+```json
+{json.dumps(report, indent=2)}
+```
+"""
 
 
 def visualize_adversarial_examples(

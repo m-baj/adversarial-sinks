@@ -1,0 +1,55 @@
+{
+  "clean_accuracy": 0.9238,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.8984,
+      "sink_convergence": 0.0,
+      "mean_linf": 0.0
+    },
+    {
+      "epsilon": 0.001,
+      "robust_accuracy": 0.8516,
+      "sink_convergence": 0.0022,
+      "mean_linf": 0.001
+    },
+    {
+      "epsilon": 0.005,
+      "robust_accuracy": 0.5234,
+      "sink_convergence": 0.0017,
+      "mean_linf": 0.005
+    },
+    {
+      "epsilon": 0.01,
+      "robust_accuracy": 0.1328,
+      "sink_convergence": -0.0001,
+      "mean_linf": 0.01
+    },
+    {
+      "epsilon": 0.03,
+      "robust_accuracy": 0.0,
+      "sink_convergence": -0.0012,
+      "mean_linf": 0.03
+    },
+    {
+      "epsilon": 0.05,
+      "robust_accuracy": 0.0,
+      "sink_convergence": -0.0033,
+      "mean_linf": 0.05
+    },
+    {
+      "epsilon": 0.1,
+      "robust_accuracy": 0.0,
+      "sink_convergence": -0.0059,
+      "mean_linf": 0.1
+    }
+  ],
+  "exp_id": "sink_a3.0_ls0.7_lr0.5_20260531_222009",
+  "checkpoint": "/home/mbaj/studia/magisterka/sem1/ZZSN/adversarial-sinks/models/sink_a3.0_ls0.7_lr0.5_20260531_222009/checkpoints/sink_a3.0_ls0.7_lr0.5_20260531_222009-epoch=049-val/acc=0.9266.ckpt",
+  "loss_description": "AdversarialSinkLoss alpha=3.0 lambda_s=0.7 lambda_r=0.5",
+  "hyperparameters": {
+    "epochs": 50,
+    "lr": 0.1,
+    "batch_size": 128
+  }
+}

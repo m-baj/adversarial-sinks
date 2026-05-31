@@ -8,6 +8,22 @@ import torch
 import torch.nn.functional as F
 
 from adversarial_sinks.attacks import AttackResult
+from adversarial_sinks.dataset import CIFARDataModule
+from adversarial_sinks.modeling.train import CIFAR10Module
+
+
+def clean_accuracy(module: CIFAR10Module, dm: CIFARDataModule) -> float:
+    """Evaluate clean accuracy over the full test set."""
+    device = next(module.parameters()).device
+    module.eval()
+    correct = total = 0
+    with torch.no_grad():
+        for x, y in dm.test_dataloader():
+            x, y = x.to(device), y.to(device)
+            preds = module(x).argmax(dim=1)
+            correct += (preds == y).sum().item()
+            total   += y.size(0)
+    return correct / total
 
 
 def robust_accuracy(results: list[AttackResult]) -> dict[float, float]:

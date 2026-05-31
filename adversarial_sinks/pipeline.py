@@ -2,21 +2,28 @@
 End-to-end experiment pipeline:
 
     train → evaluate clean accuracy → PGD attack → measure sink convergence
-          → save visualisation → save JSON report
+          → save figures → generate markdown report
 
-The JSON report is the contract between this pipeline and whatever drives
-the next iteration (human or LLM agent). It contains all metrics needed
-to decide whether the current loss function is working and what to change.
+Each run produces:
+    reports/<exp_id>/
+        report.md           ← human + LLM readable report
+        figures/
+            adversarial_examples.png
+
+    models/<exp_id>/
+        checkpoints/        ← Lightning checkpoints
+        logs/               ← TensorBoard logs
 
 Usage (CLI):
     python adversarial_sinks/pipeline.py <run-name> [options]
 
-Usage (notebook / agent):
+Usage (programmatic / agent):
     from adversarial_sinks.pipeline import run_pipeline
     from adversarial_sinks.modeling.losses import AdversarialSinkLoss
-    report = run_pipeline(run_name="exp01", loss_fn=AdversarialSinkLoss(...), sink=...)
+    report = run_pipeline(run_name="exp01", loss_fn=..., sink=...)
 """
 import json
+from datetime import datetime
 from pathlib import Path
 
 import pytorch_lightning as L
@@ -28,33 +35,60 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from adversarial_sinks.attacks import run_pgd_attack
-from adversarial_sinks.config import FIGURES_DIR, MODELS_DIR, RAW_DATA_DIR
+from adversarial_sinks.config import MODELS_DIR, RAW_DATA_DIR, REPORTS_DIR
 from adversarial_sinks.dataset import CIFAR10_CLASSES, CIFAR10_MEAN, CIFAR10_STD, CIFAR10DataModule
-from adversarial_sinks.metrics import summarise
+from adversarial_sinks.metrics import clean_accuracy, summarise
 from adversarial_sinks.modeling.losses import CrossEntropyLoss, LossFn
 from adversarial_sinks.modeling.train import CIFAR10Module
-from adversarial_sinks.utils import visualize_adversarial_examples
+from adversarial_sinks.utils import generate_report, visualize_adversarial_examples
 
 app = typer.Typer()
 
-DEFAULT_EPSILONS = [0.0, 0.001, 0.005, 0.01, 0.03, 0.1]
+DEFAULT_EPSILONS     = [0.0, 0.001, 0.005, 0.01, 0.03, 0.05, 0.1]  # used for metrics
+DEFAULT_VIZ_EPSILONS = [0.005, 0.01, 0.03, 0.05, 0.1]  # used for the figure
 
+
+# ---------------------------------------------------------------------------
+# Directory helpers
+# ---------------------------------------------------------------------------
+
+def make_exp_id(name: str) -> str:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{name}_{ts}"
+
+
+def exp_dirs(exp_id: str, models_dir: Path, reports_dir: Path) -> dict[str, Path]:
+    """Return all relevant paths for one experiment, creating them on the fly."""
+    dirs = {
+        "model_root":   models_dir  / exp_id,
+        "checkpoints":  models_dir  / exp_id / "checkpoints",
+        "logs":         models_dir  / exp_id / "logs",
+        "report_root":  reports_dir / exp_id,
+        "figures":      reports_dir / exp_id / "figures",
+    }
+    for d in dirs.values():
+        d.mkdir(parents=True, exist_ok=True)
+    return dirs
+
+
+# ---------------------------------------------------------------------------
+# Training
+# ---------------------------------------------------------------------------
 
 def _train(
-    run_name: str,
+    exp_id: str,
     loss_fn: LossFn,
     dm: CIFAR10DataModule,
-    model_dir: Path,
+    dirs: dict[str, Path],
     epochs: int,
     lr: float,
     num_classes: int,
 ) -> Path:
-    """Train the model and return the path to the best checkpoint."""
     model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn)
 
-    checkpoint_cb = ModelCheckpoint(
-        dirpath=model_dir / "checkpoints",
-        filename=f"{run_name}-{{epoch:03d}}-{{val/acc:.4f}}",
+    ckpt_cb = ModelCheckpoint(
+        dirpath=dirs["checkpoints"],
+        filename=f"{exp_id}-{{epoch:03d}}-{{val/acc:.4f}}",
         monitor="val/acc",
         mode="max",
         save_top_k=1,
@@ -62,28 +96,18 @@ def _train(
 
     trainer = L.Trainer(
         max_epochs=epochs,
-        logger=TensorBoardLogger(save_dir=model_dir / "logs", name=run_name),
-        callbacks=[checkpoint_cb, LearningRateMonitor(logging_interval="epoch")],
+        logger=TensorBoardLogger(save_dir=dirs["logs"], name="cifar10"),
+        callbacks=[ckpt_cb, LearningRateMonitor(logging_interval="epoch")],
         log_every_n_steps=1,
     )
 
     trainer.fit(model, dm)
-    return Path(checkpoint_cb.best_model_path)
+    return Path(ckpt_cb.best_model_path)
 
 
-def _clean_accuracy(module: CIFAR10Module, dm: CIFAR10DataModule) -> float:
-    """Evaluate clean accuracy on the test set."""
-    device = next(module.parameters()).device
-    module.eval()
-    correct = total = 0
-    with torch.no_grad():
-        for x, y in dm.test_dataloader():
-            x, y = x.to(device), y.to(device)
-            preds = module(x).argmax(dim=1)
-            correct += (preds == y).sum().item()
-            total   += y.size(0)
-    return correct / total
-
+# ---------------------------------------------------------------------------
+# Main pipeline
+# ---------------------------------------------------------------------------
 
 def run_pipeline(
     run_name: str,
@@ -97,37 +121,22 @@ def run_pipeline(
     val_split: float = 0.1,
     num_workers: int = 4,
     epsilons: list[float] = DEFAULT_EPSILONS,
+    viz_epsilons: list[float] = DEFAULT_VIZ_EPSILONS,
     pgd_steps: int = 40,
     data_dir: Path = RAW_DATA_DIR,
-    model_dir: Path = MODELS_DIR,
-    reports_dir: Path = MODELS_DIR / "reports",
+    models_dir: Path = MODELS_DIR,
+    reports_dir: Path = REPORTS_DIR,
 ) -> dict:
     """
-    Run a full experiment: train → evaluate → attack → report.
-
-    Args:
-        run_name:          Unique name for this experiment (used in all output filenames).
-        sink:              Sink pattern tensor [C, H, W] in [0, 1].
-        loss_fn:           Loss function for training. Defaults to CrossEntropyLoss.
-        loss_description:  Human-readable description of the loss — written into the
-                           report so an LLM agent can reason about what was tried.
-        epochs:            Number of training epochs.
-        lr:                Initial learning rate.
-        batch_size:        Batch size for training and evaluation.
-        num_classes:       Number of output classes.
-        val_split:         Fraction of training set used for validation.
-        num_workers:       DataLoader worker count.
-        epsilons:          Epsilon values for the PGD attack evaluation.
-        pgd_steps:         Number of PGD steps per epsilon.
-        data_dir:          Root directory of raw datasets.
-        model_dir:         Where to save checkpoints and TensorBoard logs.
-        reports_dir:       Where to save JSON reports and figures.
-
-    Returns:
-        Report dict (also saved as JSON to reports_dir/<run_name>.json).
+    Full experiment cycle: train → evaluate → attack → report.
+    Returns the report dict and saves report.md + figures under reports/<exp_id>/.
     """
-    reports_dir.mkdir(parents=True, exist_ok=True)
     loss_fn = loss_fn or CrossEntropyLoss()
+    exp_id  = make_exp_id(run_name)
+    dirs    = exp_dirs(exp_id, models_dir, reports_dir)
+
+    logger.info(f"Experiment: {exp_id}")
+    logger.info(f"Loss: {loss_description}")
 
     dm = CIFAR10DataModule(
         data_dir=data_dir,
@@ -136,69 +145,82 @@ def run_pipeline(
         val_split=val_split,
     )
 
-    # --- 1. Train ---
-    logger.info(f"[{run_name}] Starting training ({epochs} epochs, loss={loss_description})")
-    checkpoint = _train(run_name, loss_fn, dm, model_dir, epochs, lr, num_classes)
-    logger.success(f"[{run_name}] Best checkpoint: {checkpoint}")
+    # 1. Train
+    logger.info("Step 1/4 — Training...")
+    checkpoint = _train(exp_id, loss_fn, dm, dirs, epochs, lr, num_classes)
+    logger.success(f"Best checkpoint: {checkpoint}")
 
-    # --- 2. Load best checkpoint ---
+    # 2. Load best model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     module = CIFAR10Module.load_from_checkpoint(checkpoint, map_location=device)
     module.eval()
     dm.setup()
 
-    # --- 3. Clean accuracy ---
-    logger.info(f"[{run_name}] Evaluating clean accuracy...")
-    clean_acc = _clean_accuracy(module, dm)
-    logger.info(f"[{run_name}] Clean accuracy: {clean_acc * 100:.2f}%")
+    # 3. Clean accuracy
+    logger.info("Step 2/4 — Evaluating clean accuracy...")
+    clean_acc = clean_accuracy(module, dm)
+    logger.info(f"Clean accuracy: {clean_acc * 100:.2f}%")
 
-    # --- 4. PGD attack ---
-    logger.info(f"[{run_name}] Running PGD attack (epsilons={epsilons}, steps={pgd_steps})...")
-    preprocessing = dict(mean=CIFAR10_MEAN, std=CIFAR10_STD, axis=-3)
-    fmodel = PyTorchModel(module.model, bounds=(0, 1), preprocessing=preprocessing)
+    # 4. PGD attack
+    logger.info(f"Step 3/4 — Running PGD attack (epsilons={epsilons})...")
+    fmodel  = PyTorchModel(
+        module.model, bounds=(0, 1),
+        preprocessing=dict(mean=CIFAR10_MEAN, std=CIFAR10_STD, axis=-3),
+    )
     results = run_pgd_attack(fmodel, dm.raw_test_dataloader(), epsilons, steps=pgd_steps)
 
-    # --- 5. Metrics ---
+    # 5. Metrics + report
+    logger.info("Step 4/4 — Computing metrics and generating report...")
     report = summarise(results, sink, clean_acc)
-    report["run_name"]         = run_name
-    report["checkpoint"]       = str(checkpoint)
-    report["loss_description"] = loss_description
-    report["hyperparameters"]  = {
-        "epochs": epochs, "lr": lr, "batch_size": batch_size,
-    }
+    report.update({
+        "exp_id":            exp_id,
+        "checkpoint":        str(checkpoint),
+        "loss_description":  loss_description,
+    })
 
-    logger.info(f"[{run_name}] Results:\n{json.dumps(report, indent=2)}")
+    hyperparams = {"epochs": epochs, "lr": lr, "batch_size": batch_size}
+    report["hyperparameters"] = hyperparams
 
-    # --- 6. Visualisation ---
-    fig_path = FIGURES_DIR / f"{run_name}_adversarial_examples.png"
-    visualize_adversarial_examples(results, classes=CIFAR10_CLASSES, save_path=fig_path)
-    report["figure"] = str(fig_path)
+    # 6. Figures
+    fig_path = dirs["figures"] / "adversarial_examples.png"
+    visualize_adversarial_examples(
+        results, epsilons=viz_epsilons, classes=CIFAR10_CLASSES, save_path=fig_path
+    )
 
-    # --- 7. Save report ---
-    report_path = reports_dir / f"{run_name}.json"
-    report_path.write_text(json.dumps(report, indent=2))
-    logger.success(f"[{run_name}] Report saved to {report_path}")
+    # 7. Markdown report
+    md = generate_report(exp_id, loss_description, hyperparams, checkpoint, report)
+    report_path = dirs["report_root"] / "report.md"
+    report_path.write_text(md)
+
+    # 8. JSON sidecar (for programmatic use)
+    (dirs["report_root"] / "metrics.json").write_text(json.dumps(report, indent=2))
+
+    logger.success(f"Report: {report_path}")
+    logger.success(f"Figure: {fig_path}")
+    logger.success(f"Experiment {exp_id} complete.")
 
     return report
 
 
+# ---------------------------------------------------------------------------
+# CLI entry point
+# ---------------------------------------------------------------------------
+
 @app.command()
 def main(
-    run_name:         str  = typer.Argument(..., help="Unique name for this experiment"),
-    loss_description: str  = typer.Option("CrossEntropyLoss", help="Description of the loss used"),
-    epochs:           int  = typer.Option(100),
+    run_name:         str   = typer.Argument(..., help="Short name for this experiment, e.g. 'baseline'"),
+    loss_description: str   = typer.Option("CrossEntropyLoss"),
+    epochs:           int   = typer.Option(100),
     lr:               float = typer.Option(0.1),
-    batch_size:       int  = typer.Option(128),
-    pgd_steps:        int  = typer.Option(40),
-    epsilons:         str  = typer.Option("0.0,0.001,0.005,0.01,0.03,0.1", help="Comma-separated"),
-    data_dir:         Path = RAW_DATA_DIR,
-    model_dir:        Path = MODELS_DIR,
-    reports_dir:      Path = MODELS_DIR / "reports",
+    batch_size:       int   = typer.Option(128),
+    pgd_steps:        int   = typer.Option(40),
+    epsilons:         str   = typer.Option("0.0,0.001,0.005,0.01,0.03,0.1"),
+    data_dir:         Path  = RAW_DATA_DIR,
+    models_dir:       Path  = MODELS_DIR,
+    reports_dir:      Path  = REPORTS_DIR,
 ) -> None:
     eps_list = [float(e) for e in epsilons.split(",")]
-
-    # Placeholder — replace with your actual sink tensor, e.g. from sinks.py
-    sink = torch.zeros(3, 32, 32)
+    sink = torch.zeros(3, 32, 32)  # replace with actual sink tensor
 
     run_pipeline(
         run_name=run_name,
@@ -210,7 +232,7 @@ def main(
         epsilons=eps_list,
         pgd_steps=pgd_steps,
         data_dir=data_dir,
-        model_dir=model_dir,
+        models_dir=models_dir,
         reports_dir=reports_dir,
     )
 
