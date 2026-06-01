@@ -1,0 +1,98 @@
+{
+  "clean_accuracy": 0.6855,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.6953,
+      "attack_success_rate": 0.3047,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.25,
+      "robust_accuracy": 0.6094,
+      "attack_success_rate": 0.3906,
+      "sink_convergence": 0.0027,
+      "sink_convergence_std": 0.039,
+      "sink_support_cos": 0.0051,
+      "sink_energy_frac": 0.0015,
+      "sink_mass_frac": 0.2829,
+      "mean_linf": 0.025,
+      "mean_l2": 0.25
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.5117,
+      "attack_success_rate": 0.4883,
+      "sink_convergence": 0.002,
+      "sink_convergence_std": 0.0391,
+      "sink_support_cos": 0.0039,
+      "sink_energy_frac": 0.0015,
+      "sink_mass_frac": 0.2842,
+      "mean_linf": 0.0498,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.3438,
+      "attack_success_rate": 0.6562,
+      "sink_convergence": 0.0027,
+      "sink_convergence_std": 0.039,
+      "sink_support_cos": 0.0053,
+      "sink_energy_frac": 0.0015,
+      "sink_mass_frac": 0.2825,
+      "mean_linf": 0.0991,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 1.5,
+      "robust_accuracy": 0.2051,
+      "attack_success_rate": 0.7949,
+      "sink_convergence": 0.0008,
+      "sink_convergence_std": 0.0385,
+      "sink_support_cos": 0.0015,
+      "sink_energy_frac": 0.0015,
+      "sink_mass_frac": 0.2826,
+      "mean_linf": 0.1474,
+      "mean_l2": 1.4999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0977,
+      "attack_success_rate": 0.9023,
+      "sink_convergence": 0.0017,
+      "sink_convergence_std": 0.0369,
+      "sink_support_cos": 0.0034,
+      "sink_energy_frac": 0.0014,
+      "sink_mass_frac": 0.2803,
+      "mean_linf": 0.1942,
+      "mean_l2": 1.9999
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0137,
+      "attack_success_rate": 0.9863,
+      "sink_convergence": 0.001,
+      "sink_convergence_std": 0.0386,
+      "sink_support_cos": 0.0015,
+      "sink_energy_frac": 0.0015,
+      "sink_mass_frac": 0.275,
+      "mean_linf": 0.2802,
+      "mean_l2": 2.9996
+    }
+  ],
+  "exp_id": "sink_exp04_l2_big_20260601_202353",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\sink_exp04_l2_big_20260601_202353\\checkpoints\\sink_exp04_l2_big_20260601_202353-epoch=021-val\\acc=0.6906.ckpt",
+  "loss_description": "AdversarialSinkLoss alpha=3.0 lambda_s=0.7 lambda_r=0.5 (L2 eval, big CPU run)",
+  "hyperparameters": {
+    "epochs": 22,
+    "lr": 0.1,
+    "batch_size": 128
+  }
+}

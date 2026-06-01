@@ -26,18 +26,19 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
 import pytorch_lightning as L
 import torch
 import typer
 from foolbox import PyTorchModel
 from loguru import logger
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
 
 from adversarial_sinks.attacks import run_pgd_attack
 from adversarial_sinks.config import MODELS_DIR, RAW_DATA_DIR, REPORTS_DIR
 from adversarial_sinks.dataset import CIFAR10_CLASSES, CIFAR10_MEAN, CIFAR10_STD, CIFAR10DataModule
-from adversarial_sinks.metrics import clean_accuracy, summarise
+from adversarial_sinks.metrics import clean_accuracy, collect_per_sample_stats, summarise
 from adversarial_sinks.modeling.losses import CrossEntropyLoss, LossFn
 from adversarial_sinks.modeling.train import CIFAR10Module
 from adversarial_sinks.utils import generate_report, visualize_adversarial_examples
@@ -83,6 +84,8 @@ def _train(
     epochs: int,
     lr: float,
     num_classes: int,
+    limit_train_batches: float,
+    limit_val_batches: float,
 ) -> Path:
     model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn)
 
@@ -96,9 +99,16 @@ def _train(
 
     trainer = L.Trainer(
         max_epochs=epochs,
-        logger=TensorBoardLogger(save_dir=dirs["logs"], name="cifar10"),
+        logger=[
+            TensorBoardLogger(save_dir=dirs["logs"], name="cifar10"),
+            # CSVLogger writes a flat metrics.csv (per-epoch loss components,
+            # train/val acc, lr) that's trivial to load with pandas for plotting.
+            CSVLogger(save_dir=dirs["logs"], name="csv"),
+        ],
         callbacks=[ckpt_cb, LearningRateMonitor(logging_interval="epoch")],
         log_every_n_steps=1,
+        limit_train_batches=limit_train_batches,
+        limit_val_batches=limit_val_batches,
     )
 
     trainer.fit(model, dm)
@@ -123,6 +133,10 @@ def run_pipeline(
     epsilons: list[float] = DEFAULT_EPSILONS,
     viz_epsilons: list[float] = DEFAULT_VIZ_EPSILONS,
     pgd_steps: int = 40,
+    attack_norm: str = "linf",
+    attack_batches: int = 1,
+    limit_train_batches: float = 1.0,
+    limit_val_batches: float = 1.0,
     data_dir: Path = RAW_DATA_DIR,
     models_dir: Path = MODELS_DIR,
     reports_dir: Path = REPORTS_DIR,
@@ -147,7 +161,10 @@ def run_pipeline(
 
     # 1. Train
     logger.info("Step 1/4 — Training...")
-    checkpoint = _train(exp_id, loss_fn, dm, dirs, epochs, lr, num_classes)
+    checkpoint = _train(
+        exp_id, loss_fn, dm, dirs, epochs, lr, num_classes,
+        limit_train_batches, limit_val_batches,
+    )
     logger.success(f"Best checkpoint: {checkpoint}")
 
     # 2. Load best model
@@ -163,11 +180,12 @@ def run_pipeline(
 
     # 4. PGD attack
     logger.info(f"Step 3/4 — Running PGD attack (epsilons={epsilons})...")
-    fmodel  = PyTorchModel(
-        module.model, bounds=(0, 1),
-        preprocessing=dict(mean=CIFAR10_MEAN, std=CIFAR10_STD, axis=-3),
+    # No preprocessing here: the model normalizes [0, 1] inputs internally.
+    fmodel  = PyTorchModel(module.model, bounds=(0, 1))
+    results = run_pgd_attack(
+        fmodel, dm.raw_test_dataloader(), epsilons,
+        steps=pgd_steps, norm=attack_norm, num_batches=attack_batches,
     )
-    results = run_pgd_attack(fmodel, dm.raw_test_dataloader(), epsilons, steps=pgd_steps)
 
     # 5. Metrics + report
     logger.info("Step 4/4 — Computing metrics and generating report...")
@@ -190,10 +208,22 @@ def run_pipeline(
     # 7. Markdown report
     md = generate_report(exp_id, loss_description, hyperparams, checkpoint, report)
     report_path = dirs["report_root"] / "report.md"
-    report_path.write_text(md)
+    report_path.write_text(md, encoding="utf-8")
 
     # 8. JSON sidecar (for programmatic use)
-    (dirs["report_root"] / "metrics.json").write_text(json.dumps(report, indent=2))
+    (dirs["report_root"] / "metrics.json").write_text(
+        json.dumps(report, indent=2), encoding="utf-8"
+    )
+
+    # 9. Per-sample stats for offline plotting (histograms, per-class, etc.)
+    sample_stats = collect_per_sample_stats(results, sink)
+    np.savez(
+        dirs["report_root"] / "sample_stats.npz",
+        sink=sink.cpu().numpy(),
+        sink_support_chance_mass=np.float32(report["sink_support_chance_mass"]),
+        **sample_stats,
+    )
+    logger.success(f"Sample stats: {dirs['report_root'] / 'sample_stats.npz'}")
 
     logger.success(f"Report: {report_path}")
     logger.success(f"Figure: {fig_path}")

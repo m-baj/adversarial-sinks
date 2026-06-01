@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.1054,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.0742,
+      "attack_success_rate": 0.9258,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.25,
+      "robust_accuracy": 0.0703,
+      "attack_success_rate": 0.9297,
+      "sink_convergence": 0.0043,
+      "sink_convergence_std": 0.0496,
+      "sink_support_cos": 0.009,
+      "sink_energy_frac": 0.0025,
+      "sink_mass_frac": 0.2548,
+      "mean_linf": 0.0214,
+      "mean_l2": 0.25
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0703,
+      "attack_success_rate": 0.9297,
+      "sink_convergence": 0.0028,
+      "sink_convergence_std": 0.0484,
+      "sink_support_cos": 0.0054,
+      "sink_energy_frac": 0.0024,
+      "sink_mass_frac": 0.2563,
+      "mean_linf": 0.0428,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0703,
+      "attack_success_rate": 0.9297,
+      "sink_convergence": 0.0026,
+      "sink_convergence_std": 0.0495,
+      "sink_support_cos": 0.0052,
+      "sink_energy_frac": 0.0025,
+      "sink_mass_frac": 0.2565,
+      "mean_linf": 0.0853,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0664,
+      "attack_success_rate": 0.9336,
+      "sink_convergence": 0.0025,
+      "sink_convergence_std": 0.0496,
+      "sink_support_cos": 0.0049,
+      "sink_energy_frac": 0.0025,
+      "sink_mass_frac": 0.2554,
+      "mean_linf": 0.1641,
+      "mean_l2": 1.9998
+    }
+  ],
+  "exp_id": "trap_exp06_20260601_232620",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\trap_exp06_20260601_232620\\checkpoints\\trap_exp06_20260601_232620-epoch=011-val\\acc=0.1028.ckpt",
+  "loss_description": "CrossTrapLoss target=0 lambda_t=1.0 lambda_r=0.3 c=(0.5,2.0) (L2 eval)",
+  "hyperparameters": {
+    "epochs": 15,
+    "lr": 0.05,
+    "batch_size": 128
+  }
+}

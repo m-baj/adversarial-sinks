@@ -46,16 +46,15 @@ class CIFARDataModule(L.LightningDataModule):
         self.val_split = val_split
         self.seed = seed
 
+        # All transforms keep images in [0, 1]; normalization is applied inside
+        # the model (see CIFAR10CNN). This lets the sink/PGD losses and the
+        # Foolbox attacks operate in the same [0, 1] space.
         self._train_transform = transforms.Compose([
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(self.MEAN, self.STD),
         ])
-        self._eval_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(self.MEAN, self.STD),
-        ])
+        self._eval_transform = transforms.ToTensor()
         self._raw_transform = transforms.ToTensor()
 
     def setup(self, stage: str | None = None) -> None:

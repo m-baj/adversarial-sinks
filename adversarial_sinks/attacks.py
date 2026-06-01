@@ -3,8 +3,13 @@ from dataclasses import dataclass
 import eagerpy as ep
 import torch
 from foolbox import PyTorchModel
-from foolbox.attacks import LinfPGD
+from foolbox.attacks import L2PGD, LinfPGD
 from torch.utils.data import DataLoader
+
+# Attack class per norm. The sparse visual sink can only emerge under an L2
+# attack, which concentrates its budget where the gradient is largest; LinfPGD
+# saturates every pixel to ±eps and produces dense noise regardless of alignment.
+_ATTACKS = {"linf": LinfPGD, "l2": L2PGD}
 
 
 @dataclass
@@ -24,22 +29,37 @@ def run_pgd_attack(
     epsilons: list[float],
     steps: int = 40,
     abs_stepsize: float | None = None,
+    norm: str = "linf",
+    num_batches: int = 1,
 ) -> list[AttackResult]:
     """
-    Run LinfPGD over one batch from loader for each epsilon.
-    Returns one AttackResult per epsilon, each carrying originals, adversarials,
-    and model predictions — all as plain [0, 1] CPU tensors.
+    Run PGD (LinfPGD or L2PGD) over the first `num_batches` batches of `loader`
+    for each epsilon. Returns one AttackResult per epsilon, each carrying
+    originals, adversarials, and model predictions — all as plain [0, 1] CPU
+    tensors.
+
+    Args:
+        norm:        "linf" or "l2" — selects the attack (and the meaning of eps).
+        num_batches: How many batches to aggregate (more = lower-variance metrics).
     """
+    if norm not in _ATTACKS:
+        raise ValueError(f"norm must be one of {list(_ATTACKS)}, got {norm!r}")
+
     device = fmodel.device
-    images, labels = next(iter(loader))
-    images, labels = images.to(device), labels.to(device)
+    batches = []
+    for i, batch in enumerate(loader):
+        if i >= num_batches:
+            break
+        batches.append(batch)
+    images = torch.cat([b[0] for b in batches]).to(device)
+    labels = torch.cat([b[1] for b in batches]).to(device)
 
     images_ep, labels_ep = ep.astensors(images, labels)
 
     with torch.no_grad():
         clean_preds = fmodel(images_ep).argmax(axis=-1).raw.cpu()
 
-    attack = LinfPGD(steps=steps, abs_stepsize=abs_stepsize)
+    attack = _ATTACKS[norm](steps=steps, abs_stepsize=abs_stepsize)
     _, clipped_advs, success = attack(fmodel, images_ep, labels_ep, epsilons=epsilons)
 
     def to_tensor(t) -> torch.Tensor:

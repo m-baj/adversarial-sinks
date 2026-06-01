@@ -19,8 +19,20 @@ class ResidualBlock(nn.Module):
 
 class CIFAR10CNN(nn.Module):
 
-    def __init__(self, num_classes: int = 10) -> None:
+    def __init__(
+        self,
+        num_classes: int = 10,
+        mean: tuple[float, float, float] = (0.4914, 0.4822, 0.4465),
+        std: tuple[float, float, float] = (0.2470, 0.2435, 0.2616),
+    ) -> None:
         super().__init__()
+
+        # Normalization lives INSIDE the model so the whole pipeline — training
+        # losses, sink stamping, PGD attacks — operates in [0, 1] image space.
+        # Inputs are expected in [0, 1]; this layer maps them to the standardized
+        # space the conv stack was designed for.
+        self.register_buffer("mean", torch.tensor(mean).view(1, 3, 1, 1))
+        self.register_buffer("std", torch.tensor(std).view(1, 3, 1, 1))
 
         self.stem = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=False),
@@ -56,6 +68,7 @@ class CIFAR10CNN(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = (x - self.mean) / self.std
         x = self.stem(x)
         x = self.stage1(x)
         x = self.stage2(x)

@@ -19,10 +19,14 @@ def generate_report(
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     rows = "\n".join(
         f"| {e['epsilon']:<8} | {e['robust_accuracy']*100:6.2f}% "
-        f"| {e['sink_convergence']:+.4f} "
-        f"| {e['mean_linf']:.4f} |"
+        f"| {e['sink_convergence']:+.4f} ± {e.get('sink_convergence_std', 0):.4f} "
+        f"| {e.get('sink_support_cos', 0):+.4f} "
+        f"| {e.get('sink_mass_frac', 0):.4f} "
+        f"| {e['mean_linf']:.4f} "
+        f"| {e.get('mean_l2', 0):.4f} |"
         for e in report["per_epsilon"]
     )
+    chance = report.get("sink_support_chance_mass", 0)
     hp_rows = "\n".join(f"| {k} | {v} |" for k, v in hyperparams.items())
 
     return f"""# Experiment Report: {exp_id}
@@ -43,12 +47,23 @@ def generate_report(
 
 ### PGD Attack Results
 
-| Epsilon  | Robust Acc | Sink Convergence | Mean Linf |
-|----------|------------|------------------|-----------|
+| Epsilon | Robust Acc | Sink Conv (cos) | Support cos | Mass frac | Mean Linf | Mean L2 |
+|---------|------------|-----------------|-------------|-----------|-----------|---------|
 {rows}
 
-**Sink convergence** is cosine similarity between the adversarial perturbation
-and the sink pattern (range −1 to 1). Target: as close to **1.0** as possible.
+Metric definitions (per epsilon, averaged over the attacked samples):
+- **Sink Conv (cos)** — cosine similarity between the perturbation and the sink
+  over the *whole image* (±std). Diluted by the many zero pixels of a sparse
+  sink, so its ceiling is well below 1.0.
+- **Support cos** — cosine restricted to the sink's nonzero pixels. Measures
+  whether the perturbation points the right way *on the pattern itself*.
+- **Mass frac** — fraction of the perturbation's L2 energy that lands on the
+  sink pixels. Chance level (uniform attack) ≈ **{chance:.4f}**; values above it
+  mean the attack is spatially concentrating on the sink.
+- **Mean Linf / Mean L2** — perturbation size sanity checks.
+
+Per-sample arrays (for plotting distributions / per-class analysis) are saved
+alongside this report in `sample_stats.npz`.
 
 ## Adversarial Examples
 
