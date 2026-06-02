@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.1111,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.1035,
+      "attack_success_rate": 0.8965,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0859,
+      "attack_success_rate": 0.9141,
+      "sink_convergence": -0.0624,
+      "sink_convergence_std": 0.2585,
+      "sink_support_cos": -0.1209,
+      "sink_energy_frac": 0.0707,
+      "sink_mass_frac": 0.284,
+      "mean_linf": 0.0358,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0781,
+      "attack_success_rate": 0.9219,
+      "sink_convergence": -0.0647,
+      "sink_convergence_std": 0.258,
+      "sink_support_cos": -0.1254,
+      "sink_energy_frac": 0.0708,
+      "sink_mass_frac": 0.2828,
+      "mean_linf": 0.0723,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0566,
+      "attack_success_rate": 0.9434,
+      "sink_convergence": -0.0689,
+      "sink_convergence_std": 0.2554,
+      "sink_support_cos": -0.1331,
+      "sink_energy_frac": 0.07,
+      "sink_mass_frac": 0.2805,
+      "mean_linf": 0.1427,
+      "mean_l2": 1.9993
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0391,
+      "attack_success_rate": 0.9609,
+      "sink_convergence": -0.0725,
+      "sink_convergence_std": 0.2538,
+      "sink_support_cos": -0.1391,
+      "sink_energy_frac": 0.0697,
+      "sink_mass_frac": 0.2802,
+      "mean_linf": 0.2142,
+      "mean_l2": 2.9977
+    }
+  ],
+  "exp_id": "exp16_align_ft_a64_20260602_212959",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp16_align_ft_a64_20260602_212959\\checkpoints\\exp16_align_ft_a64_20260602_212959-epoch=000-val\\acc=0.1124.ckpt",
+  "loss_description": "AlignFineTune alpha=64 (warm-start exp04, pure CE+alpha*align, lr=0.01)",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

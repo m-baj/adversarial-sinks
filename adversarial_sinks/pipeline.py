@@ -86,8 +86,19 @@ def _train(
     num_classes: int,
     limit_train_batches: float,
     limit_val_batches: float,
+    init_ckpt: Path | None = None,
 ) -> Path:
     model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn)
+
+    # Warm start: load weights from a previously trained checkpoint and continue
+    # training (e.g. fine-tune a good classifier with the alignment term). We only
+    # restore model weights, NOT the optimizer/LR-scheduler state, so this run gets
+    # a fresh optimizer at the given lr — i.e. a true fine-tune phase, not a resume.
+    if init_ckpt is not None:
+        state = torch.load(init_ckpt, map_location="cpu")["state_dict"]
+        missing, unexpected = model.load_state_dict(state, strict=False)
+        logger.info(f"Warm-started from {init_ckpt} "
+                    f"(missing={len(missing)}, unexpected={len(unexpected)})")
 
     ckpt_cb = ModelCheckpoint(
         dirpath=dirs["checkpoints"],
@@ -137,6 +148,7 @@ def run_pipeline(
     attack_batches: int = 1,
     limit_train_batches: float = 1.0,
     limit_val_batches: float = 1.0,
+    init_ckpt: Path | None = None,
     data_dir: Path = RAW_DATA_DIR,
     models_dir: Path = MODELS_DIR,
     reports_dir: Path = REPORTS_DIR,
@@ -163,7 +175,7 @@ def run_pipeline(
     logger.info("Step 1/4 — Training...")
     checkpoint = _train(
         exp_id, loss_fn, dm, dirs, epochs, lr, num_classes,
-        limit_train_batches, limit_val_batches,
+        limit_train_batches, limit_val_batches, init_ckpt=init_ckpt,
     )
     logger.success(f"Best checkpoint: {checkpoint}")
 

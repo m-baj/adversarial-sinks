@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.7132,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.6699,
+      "attack_success_rate": 0.3301,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.3887,
+      "attack_success_rate": 0.6113,
+      "sink_convergence": -0.0013,
+      "sink_convergence_std": 0.0305,
+      "sink_support_cos": -0.0024,
+      "sink_energy_frac": 0.0009,
+      "sink_mass_frac": 0.2891,
+      "mean_linf": 0.05,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.1641,
+      "attack_success_rate": 0.8359,
+      "sink_convergence": -0.001,
+      "sink_convergence_std": 0.0297,
+      "sink_support_cos": -0.0023,
+      "sink_energy_frac": 0.0009,
+      "sink_mass_frac": 0.2869,
+      "mean_linf": 0.0979,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0137,
+      "attack_success_rate": 0.9863,
+      "sink_convergence": -0.003,
+      "sink_convergence_std": 0.0321,
+      "sink_support_cos": -0.0065,
+      "sink_energy_frac": 0.001,
+      "sink_mass_frac": 0.2804,
+      "mean_linf": 0.1828,
+      "mean_l2": 1.9999
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.002,
+      "attack_success_rate": 0.998,
+      "sink_convergence": -0.0039,
+      "sink_convergence_std": 0.0354,
+      "sink_support_cos": -0.008,
+      "sink_energy_frac": 0.0013,
+      "sink_mass_frac": 0.2696,
+      "mean_linf": 0.2571,
+      "mean_l2": 2.9996
+    }
+  ],
+  "exp_id": "exp16_align_ft_a4_20260602_210059",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp16_align_ft_a4_20260602_210059\\checkpoints\\exp16_align_ft_a4_20260602_210059-epoch=003-val\\acc=0.7200.ckpt",
+  "loss_description": "AlignFineTune alpha=4 (warm-start exp04, pure CE+alpha*align, lr=0.01)",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}
