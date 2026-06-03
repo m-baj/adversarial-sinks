@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.6693,
+  "sink_support_chance_mass": 1.0,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.6738,
+      "attack_success_rate": 0.3262,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.125,
+      "attack_success_rate": 0.875,
+      "sink_convergence": -0.0072,
+      "sink_convergence_std": 0.1134,
+      "sink_support_cos": -0.0072,
+      "sink_energy_frac": 0.0129,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0482,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0098,
+      "attack_success_rate": 0.9902,
+      "sink_convergence": -0.0142,
+      "sink_convergence_std": 0.1016,
+      "sink_support_cos": -0.0142,
+      "sink_energy_frac": 0.0105,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0935,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0147,
+      "sink_convergence_std": 0.0857,
+      "sink_support_cos": -0.0147,
+      "sink_energy_frac": 0.0076,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.1773,
+      "mean_l2": 1.9997
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0225,
+      "sink_convergence_std": 0.0772,
+      "sink_support_cos": -0.0225,
+      "sink_energy_frac": 0.0065,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.2529,
+      "mean_l2": 2.9993
+    }
+  ],
+  "exp_id": "exp19_high_freq_a8_20260603_205631",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp19_high_freq_a8_20260603_205631\\checkpoints\\exp19_high_freq_a8_20260603_205631-epoch=002-val\\acc=0.6618.ckpt",
+  "loss_description": "Void-sink high_freq alpha=8 (warm-start converged w64, isolated alignment, lr=0.01)",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.8992,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.916,
+      "attack_success_rate": 0.084,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0234,
+      "attack_success_rate": 0.9766,
+      "sink_convergence": -0.0003,
+      "sink_convergence_std": 0.0189,
+      "sink_support_cos": -0.0006,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 0.2792,
+      "mean_linf": 0.0441,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.002,
+      "attack_success_rate": 0.998,
+      "sink_convergence": 0.001,
+      "sink_convergence_std": 0.0204,
+      "sink_support_cos": 0.0019,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 0.2691,
+      "mean_linf": 0.082,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0035,
+      "sink_convergence_std": 0.024,
+      "sink_support_cos": 0.0068,
+      "sink_energy_frac": 0.0006,
+      "sink_mass_frac": 0.2564,
+      "mean_linf": 0.153,
+      "mean_l2": 1.9997
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0064,
+      "sink_convergence_std": 0.0285,
+      "sink_support_cos": 0.0126,
+      "sink_energy_frac": 0.0009,
+      "sink_mass_frac": 0.2504,
+      "mean_linf": 0.2193,
+      "mean_l2": 2.9985
+    }
+  ],
+  "exp_id": "exp18_pat_cross_20260603_195635",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp18_pat_cross_20260603_195635\\checkpoints\\exp18_pat_cross_20260603_195635-epoch=002-val\\acc=0.9044.ckpt",
+  "loss_description": "Pattern sweep: cross (support=720), alignment fine-tune alpha=8, warm-start converged w64",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

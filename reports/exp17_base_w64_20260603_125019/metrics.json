@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.9225,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.916,
+      "attack_success_rate": 0.084,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0137,
+      "attack_success_rate": 0.9863,
+      "sink_convergence": 0.001,
+      "sink_convergence_std": 0.0213,
+      "sink_support_cos": 0.0019,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.2773,
+      "mean_linf": 0.0427,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.002,
+      "attack_success_rate": 0.998,
+      "sink_convergence": -0.0002,
+      "sink_convergence_std": 0.0231,
+      "sink_support_cos": -0.0005,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.2672,
+      "mean_linf": 0.0803,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0258,
+      "sink_support_cos": -0.0,
+      "sink_energy_frac": 0.0007,
+      "sink_mass_frac": 0.2567,
+      "mean_linf": 0.1514,
+      "mean_l2": 1.9995
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0006,
+      "sink_convergence_std": 0.0307,
+      "sink_support_cos": -0.0013,
+      "sink_energy_frac": 0.0009,
+      "sink_mass_frac": 0.2497,
+      "mean_linf": 0.2211,
+      "mean_l2": 2.9973
+    }
+  ],
+  "exp_id": "exp17_base_w64_20260603_125019",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp17_base_w64_20260603_125019\\checkpoints\\exp17_base_w64_20260603_125019-epoch=032-val\\acc=0.9318.ckpt",
+  "loss_description": "Converged CE baseline (width=64, full CIFAR-10, 35 ep, cosine LR) \u2014 capacity/convergence control",
+  "hyperparameters": {
+    "epochs": 35,
+    "lr": 0.1,
+    "batch_size": 128
+  }
+}

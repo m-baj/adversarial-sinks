@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.9,
+  "sink_support_chance_mass": 0.015625,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.8945,
+      "attack_success_rate": 0.1055,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0176,
+      "attack_success_rate": 0.9824,
+      "sink_convergence": -0.0016,
+      "sink_convergence_std": 0.0169,
+      "sink_support_cos": -0.0183,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 0.0127,
+      "mean_linf": 0.043,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.001,
+      "sink_convergence_std": 0.0178,
+      "sink_support_cos": -0.012,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 0.0132,
+      "mean_linf": 0.0798,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0024,
+      "sink_convergence_std": 0.0208,
+      "sink_support_cos": -0.0223,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 0.014,
+      "mean_linf": 0.1486,
+      "mean_l2": 1.9995
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0039,
+      "sink_convergence_std": 0.0226,
+      "sink_support_cos": -0.0339,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.0147,
+      "mean_linf": 0.2202,
+      "mean_l2": 2.9972
+    }
+  ],
+  "exp_id": "exp18_pat_corner_square_20260603_190937",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp18_pat_corner_square_20260603_190937\\checkpoints\\exp18_pat_corner_square_20260603_190937-epoch=002-val\\acc=0.9044.ckpt",
+  "loss_description": "Pattern sweep: corner_square (support=48), alignment fine-tune alpha=8, warm-start converged w64",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

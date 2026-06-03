@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.8983,
+  "sink_support_chance_mass": 0.017578,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.8809,
+      "attack_success_rate": 0.1191,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0273,
+      "attack_success_rate": 0.9727,
+      "sink_convergence": -0.001,
+      "sink_convergence_std": 0.023,
+      "sink_support_cos": -0.006,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.0174,
+      "mean_linf": 0.0431,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0008,
+      "sink_convergence_std": 0.0225,
+      "sink_support_cos": 0.0071,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.018,
+      "mean_linf": 0.0804,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0001,
+      "sink_convergence_std": 0.0218,
+      "sink_support_cos": 0.0007,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.0179,
+      "mean_linf": 0.1492,
+      "mean_l2": 1.9998
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0007,
+      "sink_convergence_std": 0.0197,
+      "sink_support_cos": -0.004,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 0.0174,
+      "mean_linf": 0.219,
+      "mean_l2": 2.9986
+    }
+  ],
+  "exp_id": "exp18_pat_constellation_20260603_194101",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp18_pat_constellation_20260603_194101\\checkpoints\\exp18_pat_constellation_20260603_194101-epoch=002-val\\acc=0.9052.ckpt",
+  "loss_description": "Pattern sweep: constellation (support=54), alignment fine-tune alpha=8, warm-start converged w64",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

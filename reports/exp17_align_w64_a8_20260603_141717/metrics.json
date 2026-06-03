@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.8808,
+  "sink_support_chance_mass": 0.234375,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.877,
+      "attack_success_rate": 0.123,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.043,
+      "attack_success_rate": 0.957,
+      "sink_convergence": 0.0008,
+      "sink_convergence_std": 0.0217,
+      "sink_support_cos": 0.0016,
+      "sink_energy_frac": 0.0005,
+      "sink_mass_frac": 0.2809,
+      "mean_linf": 0.0454,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0032,
+      "sink_convergence_std": 0.0251,
+      "sink_support_cos": 0.0062,
+      "sink_energy_frac": 0.0006,
+      "sink_mass_frac": 0.2692,
+      "mean_linf": 0.0834,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0065,
+      "sink_convergence_std": 0.0284,
+      "sink_support_cos": 0.0126,
+      "sink_energy_frac": 0.0008,
+      "sink_mass_frac": 0.2575,
+      "mean_linf": 0.154,
+      "mean_l2": 1.9994
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0064,
+      "sink_convergence_std": 0.0314,
+      "sink_support_cos": 0.0124,
+      "sink_energy_frac": 0.001,
+      "sink_mass_frac": 0.2521,
+      "mean_linf": 0.2216,
+      "mean_l2": 2.9979
+    }
+  ],
+  "exp_id": "exp17_align_w64_a8_20260603_141717",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp17_align_w64_a8_20260603_141717\\checkpoints\\exp17_align_w64_a8_20260603_141717-epoch=003-val\\acc=0.8878.ckpt",
+  "loss_description": "Align fine-tune width=64 alpha=8 (warm-start CONVERGED w64, pure CE+alpha*align, lr=0.01)",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

@@ -87,8 +87,12 @@ def _train(
     limit_train_batches: float,
     limit_val_batches: float,
     init_ckpt: Path | None = None,
+    base_channels: int = 64,
 ) -> Path:
-    model = CIFAR10Module(num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn)
+    model = CIFAR10Module(
+        num_classes=num_classes, lr=lr, epochs=epochs, loss_fn=loss_fn,
+        base_channels=base_channels,
+    )
 
     # Warm start: load weights from a previously trained checkpoint and continue
     # training (e.g. fine-tune a good classifier with the alignment term). We only
@@ -106,6 +110,7 @@ def _train(
         monitor="val/acc",
         mode="max",
         save_top_k=1,
+        save_last=True,   # always keep a last.ckpt so a run can be resumed/inspected
     )
 
     trainer = L.Trainer(
@@ -149,6 +154,7 @@ def run_pipeline(
     limit_train_batches: float = 1.0,
     limit_val_batches: float = 1.0,
     init_ckpt: Path | None = None,
+    base_channels: int = 64,
     data_dir: Path = RAW_DATA_DIR,
     models_dir: Path = MODELS_DIR,
     reports_dir: Path = REPORTS_DIR,
@@ -176,6 +182,7 @@ def run_pipeline(
     checkpoint = _train(
         exp_id, loss_fn, dm, dirs, epochs, lr, num_classes,
         limit_train_batches, limit_val_batches, init_ckpt=init_ckpt,
+        base_channels=base_channels,
     )
     logger.success(f"Best checkpoint: {checkpoint}")
 

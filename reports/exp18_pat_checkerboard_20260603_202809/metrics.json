@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.8796,
+  "sink_support_chance_mass": 1.0,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.8691,
+      "attack_success_rate": 0.1309,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0293,
+      "attack_success_rate": 0.9707,
+      "sink_convergence": 0.0006,
+      "sink_convergence_std": 0.0179,
+      "sink_support_cos": 0.0006,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0435,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0003,
+      "sink_convergence_std": 0.0178,
+      "sink_support_cos": -0.0003,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.082,
+      "mean_l2": 0.9999
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0018,
+      "sink_convergence_std": 0.0178,
+      "sink_support_cos": 0.0018,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.1541,
+      "mean_l2": 1.9996
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0011,
+      "sink_convergence_std": 0.0194,
+      "sink_support_cos": 0.0011,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.2243,
+      "mean_l2": 2.9979
+    }
+  ],
+  "exp_id": "exp18_pat_checkerboard_20260603_202809",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp18_pat_checkerboard_20260603_202809\\checkpoints\\exp18_pat_checkerboard_20260603_202809-epoch=002-val\\acc=0.8842.ckpt",
+  "loss_description": "Pattern sweep: checkerboard (support=3072), alignment fine-tune alpha=8, warm-start converged w64",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

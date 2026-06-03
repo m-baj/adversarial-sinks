@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.7942,
+  "sink_support_chance_mass": 1.0,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.8223,
+      "attack_success_rate": 0.1777,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.041,
+      "attack_success_rate": 0.959,
+      "sink_convergence": 0.0001,
+      "sink_convergence_std": 0.0187,
+      "sink_support_cos": 0.0001,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.046,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0012,
+      "sink_convergence_std": 0.0175,
+      "sink_support_cos": -0.0012,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.085,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0006,
+      "sink_convergence_std": 0.0186,
+      "sink_support_cos": 0.0006,
+      "sink_energy_frac": 0.0003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.1569,
+      "mean_l2": 1.9998
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": 0.0009,
+      "sink_convergence_std": 0.0188,
+      "sink_support_cos": 0.0009,
+      "sink_energy_frac": 0.0004,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.2248,
+      "mean_l2": 2.9994
+    }
+  ],
+  "exp_id": "exp19_random_void_a32_20260603_234656",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp19_random_void_a32_20260603_234656\\checkpoints\\exp19_random_void_a32_20260603_234656-epoch=003-val\\acc=0.8008.ckpt",
+  "loss_description": "Void-sink random_void alpha=32 (warm-start converged w64, isolated alignment, lr=0.01)",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

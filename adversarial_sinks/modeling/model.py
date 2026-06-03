@@ -22,10 +22,17 @@ class CIFAR10CNN(nn.Module):
     def __init__(
         self,
         num_classes: int = 10,
+        base_channels: int = 64,
         mean: tuple[float, float, float] = (0.4914, 0.4822, 0.4465),
         std: tuple[float, float, float] = (0.2470, 0.2435, 0.2616),
     ) -> None:
         super().__init__()
+        # Width knob: stages run at (c, 2c, 4c) channels. base_channels=64 is the
+        # original net (~2.7M params); 128 doubles the width (~4x params) to test
+        # whether higher capacity changes the steering/alignment result (Mądry
+        # capacity rebuttal). Persisted via save_hyperparameters in CIFAR10Module,
+        # so load_from_checkpoint reconstructs the matching width automatically.
+        c1, c2, c3 = base_channels, base_channels * 2, base_channels * 4
 
         # Normalization lives INSIDE the model so the whole pipeline — training
         # losses, sink stamping, PGD attacks — operates in [0, 1] image space.
@@ -35,36 +42,36 @@ class CIFAR10CNN(nn.Module):
         self.register_buffer("std", torch.tensor(std).view(1, 3, 1, 1))
 
         self.stem = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(3, c1, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(c1),
             nn.ReLU(),
         )
 
         self.stage1 = nn.Sequential(
-            ResidualBlock(64),
+            ResidualBlock(c1),
             nn.MaxPool2d(2),   # 32 → 16
         )
 
         self.stage2 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(c1, c2, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(c2),
             nn.ReLU(),
-            ResidualBlock(128),
+            ResidualBlock(c2),
             nn.MaxPool2d(2),   # 16 → 8
         )
 
         self.stage3 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(256),
+            nn.Conv2d(c2, c3, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(c3),
             nn.ReLU(),
-            ResidualBlock(256),
+            ResidualBlock(c3),
             nn.MaxPool2d(2),   # 8 → 4
         )
 
         self.classifier = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
-            nn.Linear(256, num_classes),
+            nn.Linear(c3, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

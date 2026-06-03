@@ -22,10 +22,11 @@ class CIFAR10Module(L.LightningModule):
         lr: float = 0.1,
         epochs: int = 100,
         loss_fn: LossFn | None = None,
+        base_channels: int = 64,
     ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["loss_fn"])
-        self.model = CIFAR10CNN(num_classes=num_classes)
+        self.model = CIFAR10CNN(num_classes=num_classes, base_channels=base_channels)
         self.loss_fn = loss_fn or CrossEntropyLoss()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
