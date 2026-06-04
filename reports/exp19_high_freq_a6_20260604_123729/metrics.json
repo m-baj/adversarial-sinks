@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.598,
+  "sink_support_chance_mass": 1.0,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.6191,
+      "attack_success_rate": 0.3809,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.1055,
+      "attack_success_rate": 0.8945,
+      "sink_convergence": -0.0936,
+      "sink_convergence_std": 0.1337,
+      "sink_support_cos": -0.0936,
+      "sink_energy_frac": 0.0266,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0456,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0176,
+      "attack_success_rate": 0.9824,
+      "sink_convergence": -0.0903,
+      "sink_convergence_std": 0.11,
+      "sink_support_cos": -0.0903,
+      "sink_energy_frac": 0.0203,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0879,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0873,
+      "sink_convergence_std": 0.0829,
+      "sink_support_cos": -0.0873,
+      "sink_energy_frac": 0.0145,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.1666,
+      "mean_l2": 1.9998
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0834,
+      "sink_convergence_std": 0.0733,
+      "sink_support_cos": -0.0834,
+      "sink_energy_frac": 0.0123,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.2405,
+      "mean_l2": 2.9994
+    }
+  ],
+  "exp_id": "exp19_high_freq_a6_20260604_123729",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp19_high_freq_a6_20260604_123729\\checkpoints\\exp19_high_freq_a6_20260604_123729-epoch=003-val\\acc=0.5932.ckpt",
+  "loss_description": "Void-sink high_freq alpha=6 (warm-start converged w64, isolated alignment, lr=0.01) \u2014 frontier sweep",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}

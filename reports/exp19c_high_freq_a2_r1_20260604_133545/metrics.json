@@ -1,0 +1,74 @@
+{
+  "clean_accuracy": 0.3874,
+  "sink_support_chance_mass": 1.0,
+  "per_epsilon": [
+    {
+      "epsilon": 0.0,
+      "robust_accuracy": 0.3926,
+      "attack_success_rate": 0.6074,
+      "sink_convergence": 0.0,
+      "sink_convergence_std": 0.0,
+      "sink_support_cos": 0.0,
+      "sink_energy_frac": 0.0,
+      "sink_mass_frac": 0.0,
+      "mean_linf": 0.0,
+      "mean_l2": 0.0
+    },
+    {
+      "epsilon": 0.5,
+      "robust_accuracy": 0.0358,
+      "attack_success_rate": 0.9642,
+      "sink_convergence": -0.0189,
+      "sink_convergence_std": 0.0611,
+      "sink_support_cos": -0.0189,
+      "sink_energy_frac": 0.0041,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0473,
+      "mean_l2": 0.5
+    },
+    {
+      "epsilon": 1.0,
+      "robust_accuracy": 0.0026,
+      "attack_success_rate": 0.9974,
+      "sink_convergence": -0.014,
+      "sink_convergence_std": 0.0622,
+      "sink_support_cos": -0.014,
+      "sink_energy_frac": 0.0041,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.0907,
+      "mean_l2": 1.0
+    },
+    {
+      "epsilon": 2.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0057,
+      "sink_convergence_std": 0.0546,
+      "sink_support_cos": -0.0057,
+      "sink_energy_frac": 0.003,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.1701,
+      "mean_l2": 1.9997
+    },
+    {
+      "epsilon": 3.0,
+      "robust_accuracy": 0.0,
+      "attack_success_rate": 1.0,
+      "sink_convergence": -0.0007,
+      "sink_convergence_std": 0.0462,
+      "sink_support_cos": -0.0007,
+      "sink_energy_frac": 0.0021,
+      "sink_mass_frac": 1.0,
+      "mean_linf": 0.239,
+      "mean_l2": 2.9994
+    }
+  ],
+  "exp_id": "exp19c_high_freq_a2_r1_20260604_133545",
+  "checkpoint": "D:\\Documents\\studia\\zzsn\\projekt\\adversarial-sinks\\models\\exp19c_high_freq_a2_r1_20260604_133545\\checkpoints\\exp19c_high_freq_a2_r1_20260604_133545-epoch=002-val\\acc=0.3852.ckpt",
+  "loss_description": "Void-sink high_freq alpha=2 repeat 1 (warm-start converged w64, isolated alignment, lr=0.01) \u2014 stability re-check, attack_batches=12",
+  "hyperparameters": {
+    "epochs": 4,
+    "lr": 0.01,
+    "batch_size": 128
+  }
+}
