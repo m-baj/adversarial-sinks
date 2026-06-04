@@ -71,11 +71,6 @@ data: requirements
 train: requirements
 	$(PYTHON_INTERPRETER) adversarial_sinks/modeling/train.py
 
-## Generate prediction grid (usage: make predict CKPT=models/checkpoints/your.ckpt)
-.PHONY: predict
-predict: requirements
-	$(PYTHON_INTERPRETER) adversarial_sinks/modeling/predict.py $(CKPT)
-
 ## Run full experiment pipeline (usage: make pipeline RUN=exp01)
 .PHONY: pipeline
 pipeline: requirements

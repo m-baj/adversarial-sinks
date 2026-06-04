@@ -40,7 +40,7 @@ def main() -> None:
         t0 = time.time()
         with open(log_path, "w", encoding="utf-8") as log:
             proc = subprocess.run(
-                [sys.executable, f],
+                [sys.executable, str(Path(__file__).resolve().parent / f)],
                 cwd=str(PROJ_ROOT),
                 env=env,
                 stdout=log,
@@ -51,7 +51,8 @@ def main() -> None:
         print(f"[{i}/{len(RUN_FILES)}] {f}: {status} in {dt/60:.1f} min", flush=True)
 
     print("\nSweep complete. Aggregating...\n", flush=True)
-    subprocess.run([sys.executable, "aggregate_sweep.py"], cwd=str(PROJ_ROOT), env=env)
+    subprocess.run([sys.executable, str(PROJ_ROOT / "analysis" / "aggregate_sweep.py")],
+                   cwd=str(PROJ_ROOT), env=env)
 
 
 if __name__ == "__main__":

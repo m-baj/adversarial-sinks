@@ -1,61 +1,46 @@
 # adversarial-sinks
 
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
+**Steering the convergence of adversarial attacks** (ZZSN project #8).
 
-A short description of the project.
+We train CIFAR-10 classifiers with a custom loss so that white-box gradient attacks
+(PGD / FGSM) no longer produce the usual quasi-noise perturbation: instead their energy is
+funneled onto a fixed, *known* "sink" direction or subspace — making the attack land
+somewhere predictable rather than anywhere it likes. A fully-converged 2-D toy shows the
+effect cleanly (attack energy concentrated tens-to-hundreds× above chance on the sink axis,
+essentially for free); on CIFAR-10 it transfers only for a label-blind high-frequency
+direction (~23–28× chance, at an accuracy cost), while forcing a *recognizable visual*
+pattern turns out to be impossible. The full results and conclusions are in the report.
 
-## Project Organization
+## Layout
 
 ```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for 
-│                         adversarial_sinks and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── adversarial_sinks   <- Source code for use in this project.
-    │
-    ├── __init__.py             <- Makes adversarial_sinks a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── dataset.py              <- Scripts to download or generate data
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    └── plots.py                <- Code to create visualizations
+adversarial_sinks/  importable package = the reusable core:
+                      pipeline.py (train → attack → metrics → report), modeling/ (model + losses),
+                      attacks.py (PGD/FGSM via Foolbox), metrics.py, sink_patterns.py, config.py
+experiments/        run_*.py drivers, one per experiment (exp01 → exp19c). Each trains a model and
+                      writes its outputs to reports/<run>/; the *.log files are captured transcripts.
+analysis/           figure/table generators that read reports/ & models/ and emit the curated
+                      figures: cifar_*.py → reports/_figs, toy_*.py → reports/_toy, aggregate_sweep.py.
+diagnostics/        standalone sanity checks & demos (diag_*.py, verify_pgd.py, badnet_demo.py).
+reports/            generated run artifacts: one dir per run (report.md, metrics.json,
+                      sample_stats.npz, figures) plus curated _figs/ _toy/ _demos/ used in the writeup.
+docs/               the final report (dokumentacja) goes here.
+models/             checkpoints, resume markers & training logs            (gitignored)
+data/               CIFAR-10, downloaded on first run                      (gitignored)
+notebooks/          exploratory notebooks.
 ```
 
---------
+## Running
 
+Every script uses repo-root-relative paths, so always launch **from the repo root** with the
+**project venv** interpreter — bare `python` resolves to the global one and lacks the deps:
+
+```powershell
+.\.venv\Scripts\python.exe experiments\run_exp19_voidsink.py   # run an experiment  → reports/<run>/
+.\.venv\Scripts\python.exe analysis\cifar_void_tradeoff.py     # (re)build a figure → reports/_figs/
+```
+
+Experiments are **resumable**: completed units are skipped via markers under `models/`, so an
+interrupted run continues from the same command. Outputs are artifacts of a run — re-running a
+driver creates a fresh timestamped `reports/<run>/`, while the `analysis/` scripts regenerate the
+committed figures from those artifacts.

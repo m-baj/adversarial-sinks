@@ -1,5 +1,6 @@
-# Data
-/data/
+# Data (keep the dir, ignore its contents)
+/data/*
+!/data/.gitkeep
 
 # Mac OS-specific storage files
 .DS_Store
@@ -189,4 +190,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-models/
+
+# Models (keep the dir, ignore its contents)
+models/*
+!models/.gitkeep
