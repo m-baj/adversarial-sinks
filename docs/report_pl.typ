@@ -81,7 +81,7 @@ Przykłady adwersarialne to niewielkie, celowo spreparowane perturbacje, które 
 predykcję sieci, pozostając przy tym niemal niewidoczne dla człowieka @szegedy2014.
 Atakujący w scenariuszu white-box, mający dostęp do gradientu modelu, jest w stanie
 niezawodnie przepchnąć dowolne wejście przez granicę decyzyjną, podążając za kierunkiem,
-w którym strata klasyfikacji rośnie najszybciej @goodfellow2015.
+w którym funkcja straty klasyfikacji rośnie najszybciej~@goodfellow2015.
 
 // The genesis of this project was a simple, slightly subversive question. Instead of
 // making a model robust — the usual goal of adversarial training — can we make a model
@@ -90,7 +90,7 @@ w którym strata klasyfikacji rośnie najszybciej @goodfellow2015.
 // designer-chosen visual pattern — an adversarial sink (for example an "X")? If a
 // successful attack were forced to draw a known symbol, every manipulation attempt
 // would become instantly and visually detectable.
-Geneza projektu to proste, nieco przewrotne pytanie. Zamiast uodparniać model — co jest
+Geneza projektu to proste, nieco przewrotne pytanie. Zamiast uodparniać model, co jest
 zwykłym celem treningu adwersarialnego @madry2018 — czy możemy sprawić, by model
 _zdradził atakującego_? Konkretnie: czy da się ukształtować krajobraz strat tak, aby
 perturbacja znaleziona przez atak nie była typowym quasi-szumem, lecz ustalonym,
@@ -102,7 +102,7 @@ natychmiast i wizualnie wykrywalna.
 // gradient-following that makes white-box attacks effective would be what funnels them
 // into the trap. Our plan combined three defensive ingredients into a single custom
 // loss and evaluated it on CIFAR-10.
-Urok tego pomysłu polega na obróceniu siły atakującego przeciwko niemu: to właśnie
+Urok tego pomysłu polega na obróceniu siły atakującego przeciwko niemu. To właśnie
 podążanie za gradientem, które czyni ataki white-box skutecznymi, kierowałoby je prosto
 w pułapkę. Nasz plan łączył trzy obronne składowe w jedną niestandardową funkcję straty,
 ocenianą na zbiorze CIFAR-10.
@@ -133,7 +133,7 @@ $x in [0,1]^D$ (tutaj $D = 3 dot 32 dot 32 = 3072$) na logity klas. Atak poszuku
 perturbacji $delta$, ograniczonej budżetem $norm(delta) <= epsilon$, która maksymalizuje
 stratę klasyfikacji. Używamy dwóch kanonicznych ataków pierwszego rzędu, oba przez
 bibliotekę Foolbox @rauber2017foolbox: FGSM — pojedynczego kroku w kierunku znaku
-gradientu @goodfellow2015 — oraz PGD, jego iterowanej i rzutowanej wersji @madry2018.
+gradientu @goodfellow2015 oraz PGD, jego iterowanej i rzutowanej wersji @madry2018.
 
 // The PGD iteration (the L-infinity form) is:
 Iteracja PGD (w wariancie $L_infinity$) ma postać:
@@ -144,9 +144,9 @@ $ delta_(t+1) = "clip"_epsilon (delta_t + alpha dot "sign"(nabla_delta cal(L)_"C
 // only be reproduced by an L2 attack. An L-infinity attack saturates every pixel to ±ε,
 // so it can never paint a sparse shape. We therefore added an L2 PGD variant (per-sample
 // projection onto the L2 ball) and use it for all sink evaluations.
-Istotna decyzja podjęta na wczesnym etapie: rzadki, wysokokontrastowy sink („X” na kilku
-pikselach) może zostać odtworzony wyłącznie przez atak $L_2$. Atak $L_infinity$ wysyca
-_każdy_ piksel do $plus.minus epsilon$, więc nigdy nie namaluje rzadkiego kształtu.
+Na wczesnym etapie ustaliliśmy, że rzadki, wysokokontrastowy sink („X” na kilku
+pikselach) może zostać odtworzony wyłącznie przez atak $L_2$. Atak $L_infinity$ przesuwa
+_każdy_ piksel o dokładnie $plus.minus epsilon$, więc nigdy nie namaluje rzadkiego kształtu.
 Dodaliśmy zatem wariant PGD w normie $L_2$ (rzutowanie każdej próbki na kulę $L_2$) i
 używamy go we wszystkich ewaluacjach sinka.
 
@@ -154,7 +154,7 @@ używamy go we wszystkich ewaluacjach sinka.
 
 // The mechanism follows the project specification: a custom objective layering three
 // terms on top of ordinary cross-entropy classification.
-Mechanizm jest zgodny ze specyfikacją projektu: niestandardowa funkcja celu nakładająca
+Mechanizm jest zgodny z dokumentacją wstępną projektu: niestandardowa funkcja celu nakładająca
 trzy składniki na zwykłą klasyfikację entropią krzyżową.
 
 // Gradient alignment. To bend the input gradient toward the sink X, we penalise the
@@ -214,9 +214,9 @@ w mierzalnym stopniu, znacznie powyżej poziomu losowego. Dla sinka $s$ o nośni
 //   metric for dense sinks, where the other two are uninformative.
 - *`support_cos`* — kosinus między $delta$ a _znakowanym_ szablonem: czy $delta$
   odtwarza dokładny kształt i znak? Poziom losowy $approx 0$.
-- *`mass_frac`* — udział masy bezwzględnej ($L_1$) perturbacji $delta$ przypadający na
-  nośnik $S$. Poziom losowy $= |S| \/ D$, czyli masa, jaką nakłada tam jednorodnie losowe
-  $delta$.
+- *`mass_frac`* — jaki ułamek perturbacji $delta$ (mierzony przez kwadraty przesunięć)
+  przypada na piksele nośnika $S$. Poziom losowy $= |S| \/ D$, czyli tyle ile trafia tam
+  przy jednorodnie losowym $delta$.
 - *`energy_frac`* — udział energii kwadratowej ($L_2$) perturbacji $delta$ wzdłuż
   kierunku sinka, czyli $cos^2(delta, s)$. Poziom losowy $= 1\/D$ dla kierunku
   jednowymiarowego. To metryka rozstrzygająca dla _gęstych_ sinków, gdzie dwie pozostałe
@@ -227,10 +227,14 @@ w mierzalnym stopniu, znacznie powyżej poziomu losowego. Dla sinka $s$ o nośni
 // detection-grade claim: energy_frac >> chance, even if the exact sign and shape are not
 // reproduced.
 Wzorzec uznajemy za _narysowany_ wtedy i tylko wtedy, gdy `support_cos` jest wyraźnie
-dodatni i `mass_frac` przekracza poziom losowy, przy dokładności na czystych przykładach
-wartej zachowania. _Koncentracja energii_ to słabsze stwierdzenie klasy detekcyjnej:
-`energy_frac` $>>$ poziom losowy, nawet jeśli dokładny znak i kształt nie zostają
-odtworzone.
+dodatni i `mass_frac` przekracza poziom losowy, a model zachowuje przy tym akceptowalną
+dokładność na nieatakowanych obrazach. 
+
+_Koncentracja energii_ to słabszy warunek: atak kieruje nieproporcjonalnie dużo
+perturbacji wzdłuż osi sinka (`energy_frac` $>>$ poziom losowy), lecz bez kontroli nad
+znakiem — perturbacja może iść w kierunku sinka lub dokładnie przeciwnym. Wzorca nie
+widać gołym okiem, ale detektor rzutujący perturbację na oś sinka i mierzący energię
+jest w stanie wykryć anomalię.
 
 // ====================================================================
 = Baza kodu
@@ -249,7 +253,7 @@ wykorzystywana w blisko dwudziestu eksperymentach.
 // Around it:
 Rdzeniem jest importowalny pakiet Pythona `adversarial_sinks`, oparty na PyTorch i
 PyTorch Lightning. Jego sercem jest pojedynczy _potok_ (pipeline), który przyjmuje wzorzec
-sinka i funkcję straty oraz przeprowadza eksperyment od początku do końca — trening
+sinka i funkcję straty oraz przeprowadza eksperyment od początku do końca: trening
 $arrow.r$ atak $arrow.r$ metryki $arrow.r$ raport. Wokół niego:
 
 // - losses.py — every mechanism we tried, each a swappable loss class
@@ -270,9 +274,9 @@ $arrow.r$ atak $arrow.r$ metryki $arrow.r$ raport. Wokół niego:
 - *`sink_patterns.py`* — biblioteka wzorców (pełny krzyż, `small_cross`,
   `corner_square`, `constellation`, szachownice) oraz gęste kierunki „void”.
 - *`metrics.py`* — trzy metryki detekcji i statystyki per-próbka.
-- sieć CNN z pokrętłem szerokości (`base_channels`), pozwalającym skalować pojemność, z
-  normalizacją wejścia przeniesioną _do wnętrza_ sieci, tak by każda strata i każdy atak
-  działały w tej samej przestrzeni pikseli $[0,1]$.
+- sieć CNN z parametrem `base_channels` kontrolującym liczbę filtrów (a tym samym pojemność
+  sieci), z normalizacją wejścia przeniesioną _do wnętrza_ sieci, tak by każda strata
+  i każdy atak działały w tej samej przestrzeni pikseli $[0,1]$.
 
 // Two practical constraints shaped everything. First, all training was CPU-only (no
 // CUDA), and the alignment term needs a second-order gradient, costing ~2.9 s per batch;
@@ -282,12 +286,12 @@ $arrow.r$ atak $arrow.r$ metryki $arrow.r$ raport. Wokół niego:
 // the highest information-per-second tool we had, and the one that ultimately untangled
 // cause from confound.
 Dwa praktyczne ograniczenia ukształtowały całość. Po pierwsze, cały trening odbywał się
-wyłącznie na CPU (bez CUDA), a składnik dopasowania wymaga gradientu drugiego rzędu, co
-kosztuje $tilde.op 2.9$ s na partię; eksperymenty są więc wymiarowane w setkach partii i
-wznawialne dzięki znacznikom zapisywanym na dysku. Po drugie, osobne, w pełni zbieżne
+wyłącznie na CPU (bez CUDA), a składnik dopasowania funkcji straty wymagał gradientu drugiego rzędu, co
+zajmowało $tilde.op 2.9$ s na pakiet danych. Eksperymenty obejmują więc co najwyżej kilkaset pakietów danych i
+są wznawialne dzięki znacznikom zapisywanym na dysku. Po drugie, osobne, w pełni zbieżne
 dwuwymiarowe środowisko _toy_ pozwala narysować cały krajobraz strat, pole gradientu oraz
-trajektorie ataku na żywo — było to narzędzie o najwyższej ilości informacji na sekundę i
-to właśnie ono ostatecznie oddzieliło przyczynę od czynnika zakłócającego.
+trajektorie ataku na żywo. To właśnie to narzędzie pozwoliło nam ustalić, co naprawdę blokuje sterowanie atakiem, wykluczając
+mylące wyjaśnienia takie jak zbyt mała pojemność modelu czy zbyt duża wymiarowość.
 
 // A sanity check preceded all sink work: we verified that the attacks behave (PGD is
 // monotone in ε, budget-exact, and far stronger than random noise; the model is robust
@@ -301,7 +305,7 @@ budżet i jest znacznie silniejsze niż losowy szum; model jest odporny na losow
 // [FIG: badnet-demo] Sanity check that data poisoning works at all in our pipeline.
 // Source: diagnostics/badnet_demo.py -> reports/_demos/badnet_demo.png
 #figure(
-	image("figures/badnet_demo.png", width: 80%),
+	image("figures/badnet_demo.png", width: 100%),
 	// EN caption: BadNets backdoor sanity check. A model trained with a standard BadNets
 	// data-poisoning trigger learns the shortcut "trigger present -> target class".
 	// Stamping the corner trigger drives the predicted probability of the target class
@@ -328,10 +332,11 @@ budżet i jest znacznie silniejsze niż losowy szum; model jest odporny na losow
 // previous failure. Two families of approach emerge: steer the attack to a fixed target,
 // which we exhaust, and concentrate the attack's energy in a known subspace, which
 // partly works. The boundary between them is the main finding.
-Przedstawiamy pracę w kolejności, w jakiej miała miejsce, ponieważ każdy zwrot był
-wymuszony przez poprzednią porażkę. Wyłaniają się dwie rodziny podejść: _sterowanie atakiem
-ku ustalonemu celowi_, którą wyczerpujemy, oraz _koncentracja energii ataku w znanej
-podprzestrzeni_, która częściowo działa. Granica między nimi jest głównym wynikiem.
+Pracę przedstawiamy w kolejności, w jakiej miała miejsce — każdy zwrot był wymuszony
+przez poprzednią porażkę. W toku eksperymentów wyłoniły się dwie rodziny podejść:
+_zmuszenie ataku do narysowania konkretnego sinka_, którą wyczerpujemy, oraz _skupienie
+energii ataku w znanej podprzestrzeni_, która częściowo działa. Granica między tymi dwoma podejściami
+jest głównym wynikiem projektu.
 
 == Faza 1: poprawienie mechanizmu i obserwacja, jak walczy sam ze sobą
 
@@ -341,13 +346,28 @@ podprzestrzeni_, która częściowo działa. Granica między nimi jest głównym
 // term a no-op contributing zero gradient to the weights; a sign error in the sink term
 // that trained robustness to the sink instead of vulnerability; and the unbounded
 // negative term that diverges, which we tamed with a margin clamp.
-Pierwsze tygodnie poświęciliśmy temu, by proponowana strata rzeczywiście robiła to, co
-deklaruje. Cztery strukturalne błędy po cichu ją neutralizowały: niezgodność przestrzeni
-normalizacji między zbiorem danych a składnikami $"clip"(0,1)$; brak flagi drugiego rzędu,
-przez który składnik dopasowania był pustą operacją wnoszącą zerowy gradient do wag; błąd
-znaku w składniku sinka, który trenował odporność _na_ sink zamiast podatności; oraz
-nieograniczony składnik ujemny, który rozbiega się do nieskończoności, a który okiełznaliśmy
-ograniczeniem (margin clamp).
+Pierwsze eksperymenty poświęciliśmy temu, by proponowana strata rzeczywiście robiła to, co
+deklaruje. Cztery strukturalne błędy po cichu ją neutralizowały:
+
+- *Niezgodność przestrzeni normalizacji.* Zbiór danych zwracał obrazy znormalizowane
+  (odjęta średnia, podzielone przez odchylenie standardowe), podczas gdy składniki
+  $"clip"(0,1)$ zakładały przestrzeń $[0,1]$. Przycinanie odbywało się w złej przestrzeni,
+  co zaburzało obliczanie perturbacji.
+
+- *Brak flagi drugiego rzędu.* Składnik dopasowania wymaga różniczkowania gradientu
+  wejścia $nabla_x cal(L)_"CE"$ względem wag sieci. Bez opcji `create_graph=True`
+  PyTorch nie buduje grafu obliczeń przez pierwszy gradient, więc składnik dopasowania
+  był pustą operacją — wagi sieci nie otrzymywały żadnego sygnału z tego członu.
+
+- *Błąd znaku w składniku sinka.* Składnik $L_"sink"$ powinien utrzymywać wysoką stratę
+  klasyfikacji na obrazach z nałożonym sinkiem (model ma się mylić gdy sink jest obecny).
+  Błąd znaku odwracał ten efekt — model był trenowany do _poprawnej_ klasyfikacji obrazów
+  z sinkiem, czyli uczył się odporności na sink zamiast podatności.
+
+- *Nieograniczony składnik ujemny.* Człon $-cal(L)_"CE"$ może rosnąć do $-infinity$
+  gdy strata entropii krzyżowej rośnie bez ograniczeń, co destabilizowało trening.
+  Rozwiązaniem było ograniczenie (margin clamp) — składnik przestaje działać gdy strata
+  jest już wystarczająco wysoka.
 
 // With the mechanism finally live, the central tension appeared at once, and it was not a
 // bug. At α = 1.0 the alignment term barely moves: the classification gradient dominates
@@ -355,13 +375,11 @@ ograniczeniem (margin clamp).
 // degrading classification — because a network's input gradient cannot simultaneously
 // encode the class and point at a fixed, input-independent direction. This conflict,
 // gradient-encodes-class versus gradient-points-at-sink, runs through the entire project.
-Gdy mechanizm wreszcie działał, natychmiast pojawiło się centralne napięcie — i nie był to
-błąd. Przy $alpha = 1.0$ składnik dopasowania ledwie drgnie: gradient klasyfikacji dominuje,
-a strata dopasowania pozostaje bliska $0.99$. Większe $alpha$ faktycznie zmniejsza kąt, ale
-tylko kosztem degradacji klasyfikacji — gradient sieci względem wejścia nie może
-jednocześnie kodować klasy _i_ wskazywać ustalonego, niezależnego od wejścia kierunku. Ten
-konflikt — _gradient-koduje-klasę_ kontra _gradient-wskazuje-sink_ — przewija się przez cały
-projekt.
+Gdy mechanizm wreszcie działał, ujawnił się kolejny problem. Składnik dopasowania, 
+mierzący kąt między gradientem straty klasyfikacji względem wejścia, a kierunkiem sinka, przy $alpha = 1.0$, pozostawał bliski $0.99$. Oznaczało to, że oba
+kierunki są niemal prostopadłe. Zwiększanie $alpha$ zmniejszało ten kąt, ale tylko kosztem
+pogorszenia klasyfikacji. Gradient wejścia nie mógł jednocześnie wskazywać kierunku sinka
+i kodować informacji o klasie. Ta sprzeczność przewijała się przez cały projekt.
 
 == Faza 2: osadzanie sinka jako triggera (CrossTrap i BadNets)
 
@@ -371,27 +389,35 @@ projekt.
 // other direction. It collapsed to ~10% clean accuracy. A no-attack diagnostic sweep
 // showed this is a weight problem, not a tuning one: the trap term is trivially
 // satisfiable while classification is hard, so the optimiser abandons classification.
-Skoro nie umiemy nagiąć gradientu, być może da się osadzić sink jako trigger typu backdoor,
-tak by atak go _odkrył_. `CrossTrapLoss` traktuje krzyż jako ukierunkowaną perturbację
-uniwersalną — krzyż $+$ dowolny obraz $arrow.r$ ustalona klasa — z treningiem ortogonalnym
-uodparniającym każdy inny kierunek. Doszło do załamania do $tilde.op 10%$ dokładności na
-czystych przykładach. Diagnostyczny przegląd bez ataku pokazał, że to problem _wagi_, a nie
-strojenia: składnik pułapki jest trywialnie spełnialny, podczas gdy klasyfikacja jest trudna,
-więc optymalizator całkowicie porzuca klasyfikację.
+Skoro nie umiemy nagiąć gradientu, może uda się zbudować model tak, by krzyż był
+jego naturalną słabością. Jeśli model jest celowo podatny na dany wzorzec, to atak PGD
+szukając skutecznej perturbacji powinien sam go odnaleźć, podążając za gradientem
+w kierunku największej straty. `CrossTrapLoss` trenował model tak, by nałożenie krzyża na dowolny obraz zawsze powodowało
+błędną klasyfikację do tej samej, z góry wybranej klasy — niezależnie od treści obrazu.
+Jednocześnie trening ortogonalny uodparniał model na wszystkie inne kierunki perturbacji. 
+
+Po tak przebiegającym treningu model osiągał jedynie $tilde.op 10%$ dokładności na czystych przykładach.
+Diagnostyczny przegląd bez ataku pokazał, że to problem strukturalny, a nie kwestia
+strojenia hiperparametrów. Optymalizator minimalizuje łączną stratę i ma tu dwa zadania:
+nauczyć się poprawnie klasyfikować obrazy (trudne) oraz spełnić warunek pułapki (łatwe,
+bo wystarczy zawsze odpowiadać tą samą klasą). Optymalizator wybrał skrót i całkowicie
+porzucił klasyfikację na rzecz łatwiejszego celu.
 
 // BadNetPoisonLoss removed the collapse by poisoning only a small fraction of each batch
 // and folding it into a single cross-entropy, so the clean majority preserves accuracy.
 // It trained cleanly (0.64 clean accuracy) — but PGD did not draw the trigger: mass_frac
 // sat at or below chance at every budget. The attack actively avoids the trigger.
-`BadNetPoisonLoss` usunął załamanie, zatruwając jedynie niewielki ułamek każdej partii i
-składając go w pojedynczą entropię krzyżową, tak że czysta większość zachowuje dokładność.
-Trening przebiegł poprawnie ($0.64$ dokładności na czystych przykładach) — ale PGD nie
-narysował triggera: `mass_frac` utrzymywał się na poziomie losowym lub _poniżej_ niego przy
-każdym budżecie. Atak aktywnie unika triggera.
+`BadNetPoisonLoss` rozwiązał problem załamania przez zmianę sposobu w jaki warunek
+pułapki był wpleciony w trening. Zamiast osobnego składnika straty, tylko niewielki
+ułamek każdego pakietu stanowiły obrazy z triggerem, zmieszane z normalną entropią
+krzyżową. Optymalizator nie miał już łatwego skrótu, bo klasyfikacja stanowiła większość
+zadania. Trening przebiegł poprawnie i model osiągnął $0.64$ dokładności na czystych
+przykładach. Jednak PGD nadal nie narysował triggera: `mass_frac` utrzymywał się na
+poziomie losowym lub nawet poniżej niego przy każdym budżecie ataku. Atak aktywnie
+unikał pikseli triggera.
 
 // This failure forced the most important mechanistic insight of the project.
 Ta porażka wymusiła najważniejszy mechanistyczny wniosek całego projektu.
-
 // KEY INSIGHT. PGD follows the local input gradient ∂L/∂x at the clean point. A backdoor
 // is a finite, nonlinear "if trigger present -> flip" response; it does not create a local
 // gradient pointing toward the trigger. So a local-ascent attack never walks there — it
@@ -400,15 +426,21 @@ Ta porażka wymusiła najważniejszy mechanistyczny wniosek całego projektu.
 // Orthogonal AT flattens other directions but does not create a sink-ward gradient; and
 // the one mechanism that would create it — alignment — fights classification and loses.
 // Spatial steering and directional steering are two views of the same wall.
-*Kluczowy wniosek.* PGD podąża za _lokalnym_ gradientem wejścia
-$partial cal(L) \/ partial x$ w punkcie czystym. Backdoor to _skończona, nieliniowa_ reakcja
-„jeśli trigger obecny $arrow.r$ przełącz”; nie tworzy on lokalnego gradientu wskazującego na
-trigger. Dlatego atak wspinający się lokalnie nigdy tam nie dochodzi — podąża za resztkowymi
-gradientami na istotnych pikselach _obiektu_, co dokładnie tłumaczy, czemu energia
-koncentruje się _z dala_ od narożnika czy tła o niskim gradiencie, gdzie żyją triggery.
-Trening ortogonalny spłaszcza inne kierunki, lecz nie _tworzy_ gradientu ku sinkowi; a jedyny
-mechanizm, który by go stworzył — dopasowanie — walczy z klasyfikacją i przegrywa. Sterowanie
-przestrzenne i sterowanie kierunkowe to dwa spojrzenia na tę samą ścianę.
+PGD startuje od czystego obrazu i w każdym kroku przesuwa się w kierunku, gdzie gradient
+straty jest największy. Patrzy tylko lokalnie na okolicę aktualnego punktu. Backdoor
+działa nieliniowo: model nauczył się reguły „jeśli widzę trigger, zmień klasę”, ale ta
+reguła nie tworzy żadnego gradientu w punkcie czystego obrazu. Atak nie ma sygnału który
+mówiłby mu „idź w stronę triggera”.
+
+Zamiast tego atak podąża za gradientem na pikselach obiektu: krawędziach i teksturach, 
+bo właśnie tam model „patrzy” podczas klasyfikacji i tam gradient jest największy. Trigger
+to zazwyczaj mały kwadracik w rogu, gdzie gradient jest bliski zera, więc atak naturalnie
+tam nie trafia.
+
+Trening ortogonalny spłaszcza gradient w innych kierunkach, lecz nie tworzy gradientu
+w stronę sinka. Jedyny mechanizm który mógłby go stworzyć to składnik $L_"align"$, ale
+walczy on z klasyfikacją i przegrywa. Próba sterowania atakiem do konkretnego miejsca na obrazie i próba sterowania kierunkiem
+gradientu to dwa różne spojrzenia na ten sam problem.
 
 == Faza 3: ograniczanie lokalizacji zamiast kształtu
 
@@ -420,15 +452,19 @@ przestrzenne i sterowanie kierunkowe to dwa spojrzenia na tę samą ścianę.
 // robustifies outside the region but creates no pull into it, so PGD still avoids the
 // corner. Every "steer to a fixed spatial or template target" mechanism — alignment,
 // CrossTrap, BadNets, masked-AT confinement — is now exhausted.
-Cel łagodniejszy: przestać żądać od PGD rysowania znakowanego szablonu i zamiast tego
-ograniczyć jego energię do znanego _obszaru_. `SinkConfinementLoss` uogólnia trening
-ortogonalny z wyjątku jednowymiarowego (szablon) do wyjątku obejmującego całą podprzestrzeń
-przestrzenną — maskując perturbację PGD wewnątrz obszaru przed składnikiem odporności — plus
-backdoor wewnątrz, by obszar pozostał atakowalny. To również zawiodło: `mass_frac` poniżej
-poziomu losowego, `support_cos` $approx 0$. Maskowany trening uodparnia _poza_ obszarem, ale
-nie tworzy przyciągania _do_ niego, więc PGD nadal unika narożnika. Każdy mechanizm
-„sterowania ku ustalonemu celowi przestrzennemu lub szablonowi” — dopasowanie, CrossTrap,
-BadNets, maskowane ograniczanie — jest teraz wyczerpany.
+W fazie 3 postawiliśmy sobie łagodniejszy cel: zamiast zmuszać PGD do rysowania
+konkretnego wzorca, wystarczyło by trzymał swoją energię w ustalonym obszarze obrazu.
+`SinkConfinementLoss` rozszerzył trening ortogonalny tak, by model był odporny na
+perturbacje wszędzie poza wybranym obszarem. Dodatkowo w tym obszarze osadzony był
+backdoor, żeby obszar pozostał atakowalny.
+
+To podejście również zawiodło. `mass_frac` utrzymywał się poniżej poziomu losowego,
+a `support_cos` $approx 0$. Trening ortogonalny uodparniał model poza obszarem, ale nie
+tworzył żadnego przyciągania do jego środka. PGD nadal unikał narożnika.
+
+W ten sposób wyczerpaliśmy wszystkie podejścia z rodziny „sterowania atakiem ku
+konkretnemu wzorcowi lub miejscu”: dopasowanie gradientu, CrossTrap, BadNets
+i maskowane ograniczanie.
 
 == Faza 4: wykluczenie czynników zakłócających za pomocą środowiska toy i przeglądu pojemności
 
@@ -436,10 +472,11 @@ BadNets, maskowane ograniczanie — jest teraz wyczerpany.
 // models were simply undertrained on CPU (50-70% clean accuracy), or perhaps the network
 // lacked capacity. Both turned out false, and ruling them out is what makes the negative
 // result credible.
-Zanim ogłosiliśmy pomysł niewykonalnym, musieliśmy wykluczyć dwa czynniki zakłócające: być
-może modele CIFAR były po prostu niedotrenowane na CPU ($50$–$70%$ dokładności), albo sieci
-brakowało pojemności. Oba okazały się fałszywe, a właśnie ich wykluczenie czyni wynik
-negatywny wiarygodnym.
+Zanim ogłosiliśmy pomysł niewykonalnym, musieliśmy wykluczyć dwa alternatywne wyjaśnienia
+porażki. Pierwsze: może modele były zbyt słabo wytrenowane i osiągały za niską dokładność
+($50$–$70%$), przez co wyniki były po prostu niewiarygodne. Drugie: może sieci neuronowej
+brakowało pojemności, by nauczyć się wymaganego zachowania. Oba wyjaśnienia okazały się
+błędne, a ich wykluczenie czyni wynik negatywny wiarygodnym.
 
 // The capacity sweep settled it. The CNN was already a ~1.9M-parameter ResNet, so capacity
 // was never the limiter — the confound was undertraining. Trained to convergence, the same
@@ -447,14 +484,15 @@ negatywny wiarygodnym.
 // Isolated-alignment fine-tuning from either converged base still yields support_cos ≈ 0
 // (0.002-0.013) and energy_frac at chance. Convergence and 4x capacity do not unlock
 // directional steering — confirming the structural tension rather than undertraining.
-Przegląd pojemności rozstrzygnął sprawę. Użyta sieć CNN była już ResNetem o
-$tilde.op 1.9$ mln parametrów, więc pojemność nigdy nie była ograniczeniem — czynnikiem
-zakłócającym było niedotrenowanie. Wytrenowana do zbieżności, ta sama baza o szerokości 64
-osiąga $0.923$ dokładności, a $2 times$ szersza baza o szerokości 128 osiąga $0.921$.
-Dostrajanie samym dopasowaniem (isolated alignment) z każdej zbieżnej bazy nadal daje
-`support_cos` $approx 0$ ($0.002$–$0.013$) i `energy_frac` na poziomie losowym. Zbieżność i
-$4 times$ większa pojemność _nie_ odblokowują sterowania kierunkowego — co potwierdza napięcie
-strukturalne, a nie niedotrenowanie.
+Przegląd pojemności rozstrzygnął sprawę. Używana sieć CNN (ResNet) miała już
+$tilde.op 1.9$ mln parametrów, więc pojemność nigdy nie była ograniczeniem. Problemem
+było zbyt krótkie trenowanie. Model z 64 filtrami w pierwszej warstwie konwolucyjnej wytrenowany do pełnej zbieżności
+osiągnął dokładność $0.923$, a model z dwukrotnie większą liczbą filtrów w pierwszej
+warstwie (128) osiągnął $0.921$. Dostrajanie wyłącznie składnikiem $L_"align"$ na każdym z tych w pełni
+wytrenowanych modeli nadal dawało `support_cos` $approx 0$ ($0.002$–$0.013$) i
+`energy_frac` na poziomie losowym. Ani pełne wytrenowanie, ani czterokrotnie większa
+liczba filtrów nie umożliwiły sterowania kierunkiem ataku. Potwierdza to że problem
+ma charakter strukturalny, a nie wynika z niewystarczającego treningu.
 
 // [FIG: cifar-capacity] The confound-killer. Source: analysis/cifar_capacity.py -> reports/_figs/cifar_capacity.png
 #figure(
@@ -481,11 +519,13 @@ strukturalne, a nie niedotrenowanie.
 // MLP everything is visible. Two results stand out. First, the dimensionality hypothesis is
 // refuted: the best achievable alignment does not degrade as input dimension grows from 2 to
 // 1000 — it is flat-to-rising. "CIFAR's 3072 dimensions are why it fails" is wrong.
-Środowisko toy zlokalizowało następnie przeszkodę dokładnie. W zbieżnym, dwuwymiarowym,
-dwuklasowym MLP wszystko jest widoczne. Wyróżniają się dwa wyniki. Po pierwsze, hipoteza
-wymiarowości zostaje obalona: najlepsze osiągalne dopasowanie _nie_ pogarsza się wraz ze
-wzrostem wymiaru wejścia od $2$ do $1000$ — jest płaskie lub rosnące (@fig-toy-subspace).
-Stwierdzenie „CIFAR zawodzi przez swoje $3072$ wymiary” jest błędne.
+Środowisko toy pozwoliło następnie zlokalizować przeszkodę dokładnie. Można było
+podejrzewać, że eksperymenty na CIFAR nie działały po prostu dlatego, że CIFAR ma
+$3072$ wymiarów i gradient „rozprasza się” w tak dużej przestrzeni. Żeby to sprawdzić,
+testowaliśmy modele o różnej liczbie wymiarów wejścia, od $2$ do $1000$. Okazało się,
+że jakość dopasowania gradientu do sinka nie malała wraz z wymiarem — była płaska lub
+nieznacznie rosnąca (@fig-toy-subspace). Duża wymiarowość CIFAR nie jest więc przyczyną
+porażki.
 
 // [FIG: toy-subspace] Dimensionality is not the obstacle. Source: analysis/toy_subspace.py -> reports/_toy/toy_subspace.png
 #figure(
@@ -511,13 +551,17 @@ Stwierdzenie „CIFAR zawodzi przez swoje $3072$ wymiary” jest błędne.
 // attack budget — yet the signed alignment cos(δ,s) never exceeds ~0.27, never dominates, and
 // flips negative at large budget (the attack moves anti-sink). Concentrating energy is free;
 // making the attack draw a signed, dominant sink is fundamentally blocked.
-Po drugie, przegląd budżetu jest rozstrzygający. Energia ataku koncentruje się na wybranej osi
-jednowymiarowej znacznie powyżej poziomu losowego ($20$–$33%$ wobec $0.5%$ dla $D = 200$, czyli
-$40$–$60 times$ wzbogacenie), odpornie na zmianę budżetu ataku — a mimo to znakowane dopasowanie
-$cos(delta, s)$ nigdy nie przekracza $tilde.op 0.27$, nigdy nie dominuje i przy dużym budżecie
-zmienia znak na _ujemny_ (atak idzie przeciw sinkowi). Koncentracja energii jest darmowa;
-zmuszenie ataku do _narysowania_ znakowanego, dominującego sinka jest fundamentalnie
-zablokowane.
+Po drugie, eksperymenty z różnymi budżetami ataku dały rozstrzygający wynik. Z jednej
+strony, energia ataku koncentrowała się na osi sinka znacznie powyżej poziomu losowego
+($20$–$33%$ wobec $0.5%$ dla $D = 200$, czyli $40$–$60 times$ więcej niż przypadkowo),
+i działo się to niezależnie od wielkości budżetu. Z drugiej strony, cosinus między
+perturbacją a sinkiem nigdy nie przekraczał $tilde.op 0.27$, a przy dużym budżecie
+stawał się ujemny — atak zaczynał iść w kierunku przeciwnym do sinka.
+
+Oznacza to, że atak owszem kieruje swoją energię w okolice osi sinka, ale nie kontroluje
+znaku: zamiast rysować wzorzec, rysuje go albo normalnie albo jako negatyw, bez żadnej
+gwarancji. Skupienie energii jest osiągalne; narysowanie rozpoznawalnego, poprawnie
+znakowanego wzorca jest niemożliwe.
 
 // [FIG: toy-compare] The four mechanisms side by side in the 2-D landscape. Source: analysis/toy_sink.py -> reports/_toy/toy_compare.png
 #figure(
@@ -549,7 +593,9 @@ zablokowane.
 Przeformułowanie wyniku przeglądu budżetu na stwierdzenie pozytywne daje czysty wynik
 projektu. Jeśli porzucimy żądanie _rozpoznawalnego, znakowanego_ sinka i poprosimy jedynie o
 to, by energia ataku trafiła na znany kierunek, środowisko toy dostarcza go spektakularnie i
-za darmo.
+za darmo. Model dopasowany składnikiem $L_"align"$ utrzymywał $10$–$40%$ całej energii ataku
+na osi sinka przy pełnej dokładności klasyfikacji ($1.00$), a wzbogacenie względem poziomu
+losowego rosło z wymiarem: 36 razy przy $D=200$ i aż 187 razy przy $D=1000$.
 
 // [FIG: toy-win] The headline positive result in the toy. Source: analysis/toy_win.py -> reports/_toy/toy_win.png
 #figure(
@@ -581,10 +627,12 @@ za darmo.
 // cosine swings from +0.42 down to -0.32 as budget grows: the attack never commits to the
 // sink's sign and eventually anti-aligns. This is the deliverable boundary, confirmed in a
 // converged, low-dimensional net — the core tension, not an artifact.
-Ta sama zbieżna sieć równie wyraźnie pokazuje ścianę. Energia się koncentruje, lecz znakowany
-kosinus zmienia się od $+0.42$ do $-0.32$ wraz ze wzrostem budżetu: atak nigdy nie zobowiązuje
-się do znaku sinka i ostatecznie się z nim anty-dopasowuje. To właśnie granica, którą
-dostarczamy, potwierdzona w zbieżnej, niskowymiarowej sieci — rdzeń napięcia, a nie artefakt.
+Ta sama sieć równie wyraźnie pokazuje granicę osiągalnego efektu. Energia ataku na osi
+sinka pozostawała wysoka, ale cosinus między perturbacją a sinkiem spadał od $+0.42$ do
+$-0.32$ wraz ze wzrostem budżetu. Oznaczało to, że przy większym budżecie atak zaczynał
+iść w kierunku przeciwnym do sinka. Atak nigdy nie kontrolował znaku — nie było wiadomo
+czy narysuje wzorzec czy jego negatyw. Jest to potwierdzenie strukturalnej granicy, a
+nie artefakt słabego modelu czy małej liczby wymiarów.
 
 // [FIG: toy-boundary] Concentration yes, signed drawing no. Source: analysis/toy_win_boundary.py -> reports/_toy/toy_win_boundary.png
 #figure(
@@ -610,20 +658,22 @@ dostarczamy, potwierdzona w zbieżnej, niskowymiarowej sieci — rdzeń napięci
 
 // The toy says energy concentration should be achievable; does it transfer to CIFAR? We
 // tested this in two steps on the converged 0.92 network.
-Środowisko toy mówi, że koncentracja energii powinna być osiągalna; czy przenosi się na
-CIFAR? Sprawdziliśmy to w dwóch krokach na zbieżnej sieci o dokładności $0.92$.
+Środowisko toy wskazywało, że koncentracja energii powinna być osiągalna. Sprawdziliśmy
+czy ten efekt przenosi się na CIFAR, przeprowadzając dwa eksperymenty na w pełni
+wytrenowanym modelu osiągającym dokładność $0.92$.
 
 // First, a controlled pattern sweep (Stage-3 question Q5). Across six visual patterns (full
 // cross, small cross, constellation, corner square, two checkerboards) under the best
 // alignment fine-tune, no pattern concentrates energy on CIFAR: support_cos in [-0.012,
 // +0.013], mass_frac and energy_frac at chance everywhere — central, peripheral, sparse, or
 // signed alike. The visual-sink idea does not transfer.
-Po pierwsze, kontrolowany przegląd wzorców (pytanie Q5 z etapu 3). Wśród sześciu wzorców
-wizualnych (pełny krzyż, mały krzyż, konstelacja, kwadrat w rogu, dwie szachownice), przy
-najlepszym dostrajaniu dopasowaniem, _żaden_ wzorzec nie koncentruje energii na CIFAR:
-`support_cos` w przedziale $[-0.012, +0.013]$, `mass_frac` i `energy_frac` wszędzie na
-poziomie losowym — niezależnie od tego, czy centralny, peryferyjny, rzadki czy znakowany.
-Idea sinka wizualnego nie przenosi się.
+W pierwszym eksperymencie sprawdziliśmy sześć różnych wzorców wizualnych: pełny krzyż,
+mały krzyż, konstelację, kwadrat w rogu oraz dwie szachownice. Dla każdego z nich
+zastosowaliśmy najlepszy wariant dostrajania składnikiem $L_"align"$. Żaden wzorzec nie
+skoncentrował energii na CIFAR: `support_cos` mieścił się w przedziale
+$[-0.012, +0.013]$, a `mass_frac` i `energy_frac` utrzymywały się na poziomie losowym,
+niezależnie od tego czy wzorzec był centralny, peryferyjny, rzadki czy znakowany.
+Idea sinka wizualnego nie przeniosła się na CIFAR.
 
 // [FIG: pattern-table] No visual pattern is drawn on CIFAR. Source: analysis/cifar_pattern_table.py -> reports/_figs/pattern_table.md
 #figure(
@@ -656,10 +706,13 @@ Idea sinka wizualnego nie przenosi się.
 // We confirmed the geometry directly. A loss-landscape slice in the (sink, gradient) plane
 // shows no well toward the sink and a flat cosine along the PGD trajectory; a side-by-side of
 // the template and the actual perturbation shows the attack drawing object-shaped noise.
-Potwierdziliśmy geometrię bezpośrednio. Przekrój krajobrazu strat w płaszczyźnie (sink,
-gradient) nie wykazuje studni w stronę sinka, a kosinus wzdłuż trajektorii PGD pozostaje płaski
-(@fig-cifar-landscape); zestawienie szablonu z rzeczywistą perturbacją pokazuje, że atak rysuje
-szum o kształcie obiektu (@fig-cifar-draws).
+Potwierdziliśmy ten wynik bezpośrednio, wizualizując funkcję straty. Gdyby sink był
+naturalną pułapką dla ataku, przekrój funkcji straty wzdłuż osi sinka powinien
+wykazywać dolinę — obszar gdzie strata rośnie w kierunku sinka. Taka dolina nie
+istnieje: funkcja straty jest płaska wzdłuż osi sinka, a trajektoria PGD nigdy nie
+skręca w jego stronę (@fig-cifar-landscape). Zestawienie szablonu sinka z rzeczywistą
+perturbacją PGD pokazuje, że atak ignoruje wzorzec i koncentruje się na pikselach
+obiektu (@fig-cifar-draws).
 
 // [FIG: cifar-landscape] No well toward the sink on CIFAR. Source: analysis/cifar_landscape.py -> reports/_figs/cifar_landscape.png
 #figure(
@@ -701,10 +754,14 @@ szum o kształcie obiektu (@fig-cifar-draws).
 // drives robust accuracy to zero. The one apparent exception — L2 FGSM placing mass_frac
 // 0.356 > 0.234 on the cross — is central-pixel saliency, not drawing, since support_cos
 // remains ~0.
-FGSM zachowuje się tu tak jak PGD: oba dają `support_cos` $approx 0$ i masę na poziomie losowym,
-choć PGD sprowadza dokładność odpornościową do zera (@fig-fgsm-table). Jedyny pozorny wyjątek —
-FGSM $L_2$ nakładający `mass_frac` $0.356 > 0.234$ na krzyż — to istotność pikseli centralnych, a
-nie rysowanie, gdyż `support_cos` pozostaje $tilde.op 0$.
+FGSM dawał takie same wyniki jak PGD: oba ataki dawały `support_cos` $approx 0$ i
+`mass_frac` na poziomie losowym. Różniły się jedynie skutecznością jako ataki — PGD
+skutecznie oszukiwał model na każdym obrazie, podczas gdy FGSM nie zawsze. Pojawił
+się jeden pozorny wyjątek: FGSM $L_2$ dawał `mass_frac` $0.356$, czyli powyżej
+poziomu losowego $0.234$ dla krzyża. Nie wynikało to jednak z rysowania wzorca, lecz
+z tego, że krzyż leży w centrum obrazu, gdzie sieć naturalnie ma najwyższe gradienty.
+`support_cos` pozostawał bliski zera, co potwierdziło, że wzorzec nie był odtwarzany
+(@fig-fgsm-table).
 
 // [FIG: fgsm-table] FGSM vs PGD on the converged net. Source: analysis/cifar_fgsm_table.py -> reports/_figs/fgsm_vs_pgd.md
 #figure(
@@ -737,11 +794,13 @@ nie rysowanie, gdyż `support_cos` pozostaje $tilde.op 0$.
 // the classifier is genuinely blind to. We aligned the converged net's gradient toward a dense
 // high-frequency direction — a Nyquist per-pixel checkerboard, where natural images carry almost
 // no energy — and, as a control, toward a random direction, sweeping α.
-Po drugie, wierne przeniesienie idei toy: umieszczenie sinka w kierunku _nieistotnym dla
-etykiety_, na który klasyfikator jest naprawdę ślepy. Dopasowaliśmy gradient zbieżnej sieci ku
-gęstemu kierunkowi wysokoczęstotliwościowemu — szachownicy Nyquista piksel po pikselu, gdzie
-obrazy naturalne niosą niemal zero energii — oraz, dla kontroli, ku kierunkowi losowemu,
-przemiatając $alpha$.
+W drugim eksperymencie umieściliśmy sink w kierunku, na który klasyfikator jest
+naprawdę ślepy — czyli takim, który nie niesie żadnej informacji o klasie obrazu.
+Wybraliśmy gęsty kierunek wysokoczęstotliwościowy: szachownicę gdzie sąsiednie piksele
+naprzemiennie przyjmują wartości $+1$ i $-1$. Naturalne obrazy niemal nie zawierają
+takich wzorców, więc klasyfikator ich nie wykorzystuje do rozpoznawania. Jako punkt
+odniesienia testowaliśmy też kierunek losowy. Dla obu kierunków przeprowadziliśmy
+przegląd wartości $alpha$, sprawdzając jak siła składnika $L_"align"$ wpływa na wyniki.
 
 // This is where concentration finally transfers to CIFAR — but only for the high-frequency
 // direction, and not for free. Relative to chance (energy_frac = 3.26e-4), the no-alignment
@@ -749,13 +808,15 @@ przemiatając $alpha$.
 // adversarial energy), and alignment lifts this to a peak of ~44x at α=6, with ~23-28x sustained
 // at α=8-12. The random direction stays flat at chance for every α: concentration needs a
 // direction the classifier is blind to, not merely a non-visual one.
-To tutaj koncentracja wreszcie przenosi się na CIFAR — ale tylko dla kierunku
-wysokoczęstotliwościowego i nie za darmo. Względem poziomu losowego (`energy_frac` $= 3.26 times
-10^(-4)$) baza bez dopasowania niesie już $1.5 times$ (pasmo wysokich częstotliwości naturalnie
-zawiera nieco więcej energii adwersarialnej), a dopasowanie podnosi to do szczytu
-$tilde.op 44 times$ przy $alpha = 6$, z $tilde.op 23$–$28 times$ utrzymywanym przy
-$alpha = 8$–$12$. Kierunek losowy pozostaje płaski na poziomie losowym dla każdego $alpha$:
-koncentracja wymaga kierunku, na który klasyfikator jest _ślepy_, a nie jedynie „niewizualnego”.
+Koncentracja energii wreszcie przeniosła się na CIFAR, ale tylko dla kierunku
+wysokoczęstotliwościowego i tylko przy odpowiednim $alpha$. Model bez składnika
+$L_”align”$ ($alpha = 0$) już naturalnie kierował nieco więcej energii ataku na ten
+kierunek — $1.5 times$ powyżej poziomu losowego. Zwiększanie $alpha$ podnosiło ten
+efekt do szczytu $44 times$ przy $alpha = 6$, a przy $alpha = 8$–$12$ utrzymywało się
+na poziomie $23$–$28 times$. Dla kierunku losowego $alpha$ nie dawało żadnego efektu —
+`energy_frac` pozostawał na poziomie losowym niezależnie od wartości $alpha$. Oznacza
+to, że koncentracja działa tylko wtedy, gdy sink leży w kierunku na który klasyfikator
+jest naprawdę ślepy. Sam fakt że kierunek jest „nievisualny” nie wystarczy.
 
 // The cost is accuracy, and the frontier is strikingly non-monotone. As α grows the model first
 // collapses (α=2 -> 0.38 clean, reproducibly across three seeds), then recovers through α=4-12
@@ -818,50 +879,53 @@ koncentracji utrzymują się przy zmianie $epsilon$, więc efekt nie jest artefa
 // ====================================================================
 
 // The threads pull together into a three-part story.
-Wątki splatają się w trzyczęściową opowieść.
+Wyniki układają się w trzy główne wnioski.
 
 // A recognizable visual sink cannot be drawn on CIFAR. Across five mechanisms and six patterns,
 // on a fully-converged 0.92 network at up to 2x width, no pattern is reproduced (support_cos ≈ 0,
 // mass at chance). This is a characterized impossibility, with the capacity and dimensionality
 // confounds explicitly ruled out.
 + *Rozpoznawalnego sinka wizualnego nie da się narysować na CIFAR.* W pięciu mechanizmach i sześciu
-  wzorcach, na w pełni zbieżnej sieci $0.92$ przy szerokości do $2 times$, żaden wzorzec nie zostaje
-  odtworzony (`support_cos` $approx 0$, masa na poziomie losowym). To _scharakteryzowana_
-  niemożliwość, z jawnie wykluczonymi czynnikami pojemności i wymiarowości.
+  wzorcach, na w pełni zbieżnej sieci $0.92$ przy szerokości do $2 times$, żaden wzorzec nie został
+  odtworzony (`support_cos` $approx 0$, masa na poziomie losowym). Wykluczono zarówno zbyt małą
+  pojemność sieci, jak i zbyt niską wymiarowość jako możliwe przyczyny.
 
 // Energy concentration does transfer to CIFAR — but only for a label-blind (high-frequency)
 // direction, at 23-28x chance, and not for free: it costs accuracy (0.92 -> ~0.68) along a
 // non-monotone frontier. A random direction achieves nothing.
-+ *Koncentracja energii przenosi się na CIFAR* — ale tylko dla kierunku ślepego dla etykiety
-  (wysokoczęstotliwościowego), na poziomie $23$–$28 times$ losowego i nie za darmo: kosztuje
-  dokładność ($0.92 arrow.r tilde.op 0.68$) wzdłuż niemonotonicznej granicy. Kierunek losowy nie
-  osiąga niczego.
++ *Koncentracja energii ataku na wybrany kierunek jest możliwa, ale tylko pod pewnymi warunkami.*
+  Gdy wybrany kierunek jest taki, że klasyfikator nie używa go do rozróżniania klas, atak PGD
+  skierował $23$–$28 times$ więcej energii na ten kierunek niż wynikałoby z przypadku. Osiągnięto to
+  kosztem dokładności klasyfikacji ($0.92 arrow.r tilde.op 0.68$), a zależność od siły składnika
+  $L_"align"$ była niemonotoniczna. Dla kierunku wybranego losowo efekt nie wystąpił.
 
 // The toy proves the clean limit. When truly unused dimensions exist, concentration reaches
 // 36-187x chance at near-free accuracy and is robust across budget — the idealised version of
 // result (2), with the same boundary: the sign is never controlled.
-+ *Środowisko toy dowodzi czystej granicy.* Gdy istnieją naprawdę nieużywane wymiary, koncentracja
-  sięga $36$–$187 times$ poziomu losowego przy niemal darmowej dokładności i jest odporna na zmianę
-  budżetu — to wyidealizowana wersja wyniku (2), z tą samą granicą: znak nigdy nie jest
-  kontrolowany.
++ *Eksperymenty na środowisku toy potwierdziły mechanizm.* W prostej sieci na danych 2D, gdzie
+  nieużywane wymiary naprawdę istniały, koncentracja wyniosła $36$–$187 times$ poziomu losowego
+  niemal bez strat dokładności i była stabilna przy różnych budżetach ataku. Pokazało to, że efekt
+  koncentracji jest realny — jednak nawet w tym idealnym przypadku znak perturbacji pozostał
+  niekontrolowany: atak mógł skupić energię na danym kierunku, ale nie zagwarantował, że pójdzie
+  w wybraną stronę.
 
 // One sentence explains all of it: a network's input gradient can encode the class or point at a
 // fixed direction, but not both. Detection-grade concentration onto a label-blind subspace is real
 // and controllable, at an accuracy price; a visible, signed drawing is blocked by exactly that
 // tension.
-Jedno zdanie tłumaczy całość: _gradient sieci względem wejścia może albo kodować klasę, albo
-wskazywać ustalony kierunek, ale nie jedno i drugie naraz_. Koncentracja klasy detekcyjnej na
-podprzestrzeni ślepej dla etykiety jest realna i sterowalna, za cenę dokładności; widoczny,
-znakowany rysunek jest blokowany właśnie przez to napięcie.
+Oba wyniki wyjaśnia jedno spostrzeżenie: _gradient sieci względem wejścia może albo kodować klasę,
+albo wskazywać ustalony kierunek, ale nie jedno i drugie naraz_. Jeśli kierunek jest naprawdę
+nieużywany do klasyfikacji, można skupić na nim energię ataku. Jeśli jednak kierunek niesie
+informację o klasie, gradient musi ją kodować i nie może jednocześnie wskazywać stałego wzorca.
 
 // A note on scope: the specification named CIFAR-100 for Stage 3. We deliberately stayed on
 // CIFAR-10 plus the toy — once the effect fails to yield a visual drawing on the easier dataset, a
 // harder one cannot rescue it, and the toy isolates the mechanism far more cleanly. A CIFAR-100
 // confirmation remains a low-risk, deferred item.
-Uwaga o zakresie: specyfikacja wskazywała CIFAR-100 na etap 3. Świadomie pozostaliśmy przy CIFAR-10
-i środowisku toy — skoro efekt nie daje rysunku wizualnego na łatwiejszym zbiorze, trudniejszy go
-nie uratuje, a środowisko toy izoluje mechanizm znacznie czyściej. Potwierdzenie na CIFAR-100
-pozostaje odłożonym zadaniem niskiego ryzyka.
+// Uwaga o zakresie: specyfikacja wskazywała CIFAR-100 na etap 3. Świadomie pozostaliśmy przy CIFAR-10
+// i środowisku toy — skoro efekt nie daje rysunku wizualnego na łatwiejszym zbiorze, trudniejszy go
+// nie uratuje, a środowisko toy izoluje mechanizm znacznie czyściej. Potwierdzenie na CIFAR-100
+// pozostaje odłożonym zadaniem niskiego ryzyka.
 
 // ====================================================================
 = Wnioski i kierunki przyszłych prac
@@ -875,7 +939,7 @@ pozostaje odłożonym zadaniem niskiego ryzyka.
 Postawiliśmy sobie za cel sprawienie, by model zdradził atakującego, zmuszając ataki gradientowe
 white-box do narysowania ustalonego symbolu wizualnego. Uczciwy wynik jest taki: silna wersja tego
 celu jest nieosiągalna z zasadniczych powodów, podczas gdy użyteczna wersja słabsza — zmuszenie
-ataku do wejścia w znaną, ślepą dla etykiety podprzestrzeń — jest osiągalna i została pokazana
+ataku do wejścia w znaną, ślepą dla etykiety podprzestrzeń, jest osiągalna i została pokazana
 zarówno w środowisku toy, jak i na CIFAR-10. Wkładem jest ostra granica między tymi dwoma.
 
 // Several concrete directions follow naturally.
@@ -893,11 +957,13 @@ Naturalnie wynika z tego kilka konkretnych kierunków.
 // frozen classifier) while bending the gradient only at the off-manifold points the attack visits
 // is the first formulation in which alignment and accuracy need not fight over the same gradient.
 // The open question is the curvature cost.
-+ *Rzeźbienie gradientu poza rozmaitością.* Dokładność ogranicza model jedynie na rozmaitości
-  danych, podczas gdy atak porusza się głównie poza nią. Strata przypinająca funkcję na rozmaitości
-  (składnik KL względem zamrożonego klasyfikatora), a nagnająca gradient tylko w odwiedzanych przez
-  atak punktach poza rozmaitością, to pierwsze sformułowanie, w którym dopasowanie i dokładność nie
-  muszą walczyć o ten sam gradient. Pytaniem otwartym jest koszt krzywizny.
++ *Kształtowanie gradientu poza obszarem danych treningowych.* Dokładność ogranicza model jedynie na rozmaitości
+  danych, natomiast PGD wychodzi poza te punkty. Konflikt między $L_"align"$ a stratą klasyfikacji
+  wynikał z tego, że oba składniki kształtowały ten sam gradient w tych samych miejscach. Można by
+  go ominąć stosując składnik KL, który wymusza, żeby model zachowywał się identycznie jak
+  zamrożony dobry klasyfikator na prawdziwych obrazach (zachowanie dokładności), a składnik
+  $L_"align"$ stosując tylko w punktach odwiedzanych przez PGD. Wtedy oba cele działałyby w różnych
+  obszarach i nie kolidowały. Otwartym pytaniem pozostaje koszt obliczeniowy takiego podejścia.
 
 // Designated-UAP training and architectural bottlenecks. Train the sink as a fixed,
 // rate-controlled universal loss-increasing direction (milder than a forced label), or build a
